@@ -83,7 +83,7 @@ Real username entry, a cloud mood save, and history retrieval after a full brows
 
 The live frontend runs on Vercel. [`vercel.json`](vercel.json) specifies the Vite framework, `npm run build`, and the `dist` output directory. Use Node.js 22.x and set the two public Supabase environment variables in Vercel before building. Changes to those values require a new deployment.
 
-The current site was deployed directly from local source. GitHub automatic deployments are not configured; connect this repository in Vercel separately if you want pushes to `main` to deploy automatically.
+The existing Vercel project `happi-day-little-moments` is connected to `Piraticy/Happi-Day` on GitHub. Every push to `main` automatically starts a production build and updates the live URL after that build succeeds. Other branches use Vercel preview deployments. The Supabase configuration stays in the Vercel project’s environment variables; it is not committed to GitHub.
 
 ## Project structure
 
