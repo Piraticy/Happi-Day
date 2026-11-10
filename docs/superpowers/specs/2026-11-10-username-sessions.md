@@ -1,0 +1,9 @@
+# Username sessions
+
+The user explicitly chose username sessions without passwords instead of repeated email login. Use Supabase anonymous authentication with the chosen username stored only as display metadata. The persisted SDK session owns private rows through auth.uid(); never look up or authenticate a journal by username. The same name on another browser creates a different session.
+
+Default welcome: username, Start my journal, clear remembered-browser/cloud-storage explanation. Retain the existing email login as an optional alternate route. Once entered, each submitted check-in saves through the existing granular cloud repository. Restoring a session loads history without entering a username again. Errors must never downgrade cloud data to the shared local demo.
+
+Session loss is material: clearing browser storage, ending the session or using another device cannot restore an anonymous journal by name. Show this before entry and in an account disclosure. Require confirmation before anonymous sign-out. Provide optional recovery-email linking with Supabase updateUser while signed into the same anonymous identity; verified email can then access this journal on another device. Sending a recovery email alone does not mean verification succeeded. No password required. Existing email accounts and local demo data stay intact and imports remain explicit.
+
+No new database tables or permission relaxation: authenticated anonymous identities already match owner-based RLS. Enable anonymous authentication and manual linking in the intended live project; leave email confirmation on and provider rate limits intact. This is not a server-wide single-user cap: separate browser sessions are separate private identities. Free sender limitations still apply to optional email recovery. No session token export, username-based public journal access or embedded secret keys.

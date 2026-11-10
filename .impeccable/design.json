@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T14:44:54.936065+00:00",
+  "title": "Design System: Happi-Day",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Ground",
+        "canonical": "#fff6ed",
+        "tonalRamp": [
+          "oklch(15.0% 0.0070 67.6)",
+          "oklch(26.0% 0.0112 67.6)",
+          "oklch(38.0% 0.0143 67.6)",
+          "oklch(49.0% 0.0154 67.6)",
+          "oklch(61.0% 0.0145 67.6)",
+          "oklch(72.0% 0.0118 67.6)",
+          "oklch(84.0% 0.0074 67.6)",
+          "oklch(95.0% 0.0024 67.6)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#3e2248",
+        "tonalRamp": [
+          "oklch(15.0% 0.0337 316.6)",
+          "oklch(26.0% 0.0542 316.6)",
+          "oklch(38.0% 0.0691 316.6)",
+          "oklch(49.0% 0.0743 316.6)",
+          "oklch(61.0% 0.0699 316.6)",
+          "oklch(72.0% 0.0573 316.6)",
+          "oklch(84.0% 0.0358 316.6)",
+          "oklch(95.0% 0.0116 316.6)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#7a626d",
+        "tonalRamp": [
+          "oklch(15.0% 0.0158 349.1)",
+          "oklch(26.0% 0.0254 349.1)",
+          "oklch(38.0% 0.0324 349.1)",
+          "oklch(49.0% 0.0348 349.1)",
+          "oklch(61.0% 0.0327 349.1)",
+          "oklch(72.0% 0.0268 349.1)",
+          "oklch(84.0% 0.0168 349.1)",
+          "oklch(95.0% 0.0054 349.1)"
+        ]
+      },
+      "coral": {
+        "role": "primary",
+        "displayName": "Coral",
+        "canonical": "#b94131",
+        "tonalRamp": [
+          "oklch(15.0% 0.0718 30.5)",
+          "oklch(26.0% 0.1152 30.5)",
+          "oklch(38.0% 0.1470 30.5)",
+          "oklch(49.0% 0.1580 30.5)",
+          "oklch(61.0% 0.1487 30.5)",
+          "oklch(72.0% 0.1218 30.5)",
+          "oklch(84.0% 0.0762 30.5)",
+          "oklch(95.0% 0.0247 30.5)"
+        ]
+      },
+      "coral-hover": {
+        "role": "primary",
+        "displayName": "Coral Hover",
+        "canonical": "#a53529",
+        "tonalRamp": [
+          "oklch(15.0% 0.0679 29.5)",
+          "oklch(26.0% 0.1090 29.5)",
+          "oklch(38.0% 0.1391 29.5)",
+          "oklch(49.0% 0.1495 29.5)",
+          "oklch(61.0% 0.1407 29.5)",
+          "oklch(72.0% 0.1152 29.5)",
+          "oklch(84.0% 0.0721 29.5)",
+          "oklch(95.0% 0.0234 29.5)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#fbe9dc",
+        "tonalRamp": [
+          "oklch(15.0% 0.0119 58.3)",
+          "oklch(26.0% 0.0191 58.3)",
+          "oklch(38.0% 0.0244 58.3)",
+          "oklch(49.0% 0.0262 58.3)",
+          "oklch(61.0% 0.0247 58.3)",
+          "oklch(72.0% 0.0202 58.3)",
+          "oklch(84.0% 0.0126 58.3)",
+          "oklch(95.0% 0.0041 58.3)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#dfcbbf",
+        "tonalRamp": [
+          "oklch(15.0% 0.0127 53.1)",
+          "oklch(26.0% 0.0203 53.1)",
+          "oklch(38.0% 0.0259 53.1)",
+          "oklch(49.0% 0.0279 53.1)",
+          "oklch(61.0% 0.0262 53.1)",
+          "oklch(72.0% 0.0215 53.1)",
+          "oklch(84.0% 0.0134 53.1)",
+          "oklch(95.0% 0.0044 53.1)"
+        ]
+      },
+      "action-text": {
+        "role": "neutral",
+        "displayName": "Action Text",
+        "canonical": "#fff8ef",
+        "tonalRamp": [
+          "oklch(15.0% 0.0064 74.4)",
+          "oklch(26.0% 0.0103 74.4)",
+          "oklch(38.0% 0.0131 74.4)",
+          "oklch(49.0% 0.0141 74.4)",
+          "oklch(61.0% 0.0132 74.4)",
+          "oklch(72.0% 0.0108 74.4)",
+          "oklch(84.0% 0.0068 74.4)",
+          "oklch(95.0% 0.0022 74.4)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field",
+        "canonical": "#fff9f2",
+        "tonalRamp": [
+          "oklch(15.0% 0.0051 71.9)",
+          "oklch(26.0% 0.0082 71.9)",
+          "oklch(38.0% 0.0105 71.9)",
+          "oklch(49.0% 0.0113 71.9)",
+          "oklch(61.0% 0.0106 71.9)",
+          "oklch(72.0% 0.0087 71.9)",
+          "oklch(84.0% 0.0054 71.9)",
+          "oklch(95.0% 0.0018 71.9)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Border",
+        "canonical": "#cbb4aa",
+        "tonalRamp": [
+          "oklch(15.0% 0.0137 45.0)",
+          "oklch(26.0% 0.0219 45.0)",
+          "oklch(38.0% 0.0280 45.0)",
+          "oklch(49.0% 0.0301 45.0)",
+          "oklch(61.0% 0.0283 45.0)",
+          "oklch(72.0% 0.0232 45.0)",
+          "oklch(84.0% 0.0145 45.0)",
+          "oklch(95.0% 0.0047 45.0)"
+        ]
+      },
+      "rail-hover": {
+        "role": "neutral",
+        "displayName": "Rail Hover",
+        "canonical": "#523159",
+        "tonalRamp": [
+          "oklch(15.0% 0.0354 320.4)",
+          "oklch(26.0% 0.0568 320.4)",
+          "oklch(38.0% 0.0725 320.4)",
+          "oklch(49.0% 0.0779 320.4)",
+          "oklch(61.0% 0.0734 320.4)",
+          "oklch(72.0% 0.0601 320.4)",
+          "oklch(84.0% 0.0376 320.4)",
+          "oklch(95.0% 0.0122 320.4)"
+        ]
+      },
+      "rail-active": {
+        "role": "neutral",
+        "displayName": "Rail Active",
+        "canonical": "#60416a",
+        "tonalRamp": [
+          "oklch(15.0% 0.0345 317.7)",
+          "oklch(26.0% 0.0554 317.7)",
+          "oklch(38.0% 0.0706 317.7)",
+          "oklch(49.0% 0.0759 317.7)",
+          "oklch(61.0% 0.0715 317.7)",
+          "oklch(72.0% 0.0585 317.7)",
+          "oklch(84.0% 0.0366 317.7)",
+          "oklch(95.0% 0.0119 317.7)"
+        ]
+      },
+      "mood-low": {
+        "role": "secondary",
+        "displayName": "Mood Low",
+        "canonical": "#c9c5e6",
+        "tonalRamp": [
+          "oklch(15.0% 0.0208 290.9)",
+          "oklch(26.0% 0.0334 290.9)",
+          "oklch(38.0% 0.0426 290.9)",
+          "oklch(49.0% 0.0458 290.9)",
+          "oklch(61.0% 0.0432 290.9)",
+          "oklch(72.0% 0.0353 290.9)",
+          "oklch(84.0% 0.0221 290.9)",
+          "oklch(95.0% 0.0072 290.9)"
+        ]
+      },
+      "mood-down": {
+        "role": "secondary",
+        "displayName": "Mood Down",
+        "canonical": "#bed9df",
+        "tonalRamp": [
+          "oklch(15.0% 0.0136 212.6)",
+          "oklch(26.0% 0.0218 212.6)",
+          "oklch(38.0% 0.0278 212.6)",
+          "oklch(49.0% 0.0299 212.6)",
+          "oklch(61.0% 0.0282 212.6)",
+          "oklch(72.0% 0.0231 212.6)",
+          "oklch(84.0% 0.0144 212.6)",
+          "oklch(95.0% 0.0047 212.6)"
+        ]
+      },
+      "mood-okay": {
+        "role": "secondary",
+        "displayName": "Mood Okay",
+        "canonical": "#efcf75",
+        "tonalRamp": [
+          "oklch(15.0% 0.0524 90.3)",
+          "oklch(26.0% 0.0842 90.3)",
+          "oklch(38.0% 0.1073 90.3)",
+          "oklch(49.0% 0.1154 90.3)",
+          "oklch(61.0% 0.1086 90.3)",
+          "oklch(72.0% 0.0890 90.3)",
+          "oklch(84.0% 0.0556 90.3)",
+          "oklch(95.0% 0.0181 90.3)"
+        ]
+      },
+      "mood-good": {
+        "role": "secondary",
+        "displayName": "Mood Good",
+        "canonical": "#c2d7ad",
+        "tonalRamp": [
+          "oklch(15.0% 0.0277 129.3)",
+          "oklch(26.0% 0.0445 129.3)",
+          "oklch(38.0% 0.0567 129.3)",
+          "oklch(49.0% 0.0610 129.3)",
+          "oklch(61.0% 0.0574 129.3)",
+          "oklch(72.0% 0.0470 129.3)",
+          "oklch(84.0% 0.0294 129.3)",
+          "oklch(95.0% 0.0095 129.3)"
+        ]
+      },
+      "mood-great": {
+        "role": "secondary",
+        "displayName": "Mood Great",
+        "canonical": "#f4ad94",
+        "tonalRamp": [
+          "oklch(15.0% 0.0413 40.2)",
+          "oklch(26.0% 0.0663 40.2)",
+          "oklch(38.0% 0.0845 40.2)",
+          "oklch(49.0% 0.0909 40.2)",
+          "oklch(61.0% 0.0855 40.2)",
+          "oklch(72.0% 0.0700 40.2)",
+          "oklch(84.0% 0.0438 40.2)",
+          "oklch(95.0% 0.0142 40.2)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Bricolage display",
+        "purpose": "Page questions and the main welcome message."
+      },
+      "body": {
+        "displayName": "DM Sans body",
+        "purpose": "Readable forms, labels and saved entries."
+      }
+    },
+    "shadows": [
+      {
+        "name": "notice",
+        "value": "0 8px 28px #3e224825",
+        "purpose": "Separates the floating confirmation from content."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-state",
+        "value": "150ms ease",
+        "purpose": "Color changes on control interaction."
+      },
+      {
+        "name": "mood-settle",
+        "value": "240ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "One settling motion on selecting a mood; disabled under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-max",
+        "value": "760px"
+      },
+      {
+        "name": "compact-desktop-max",
+        "value": "1000px"
+      },
+      {
+        "name": "desktop-max",
+        "value": "1200px"
+      },
+      {
+        "name": "wide-min",
+        "value": "1600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action with a trailing arrow.",
+      "html": "<button class=\"ds-primary\">Save check-in<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M4 12h15m-6-6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-primary{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:54px;padding:17px 22px;border:1px solid transparent;border-radius:13px;background:var(--coral,#b94131);color:#fff8ef;font:600 14px \"DM Sans Variable\",sans-serif;cursor:pointer;transition:background-color 150ms ease}.ds-primary:hover{background:var(--coral-hover,#a53529)}.ds-primary:focus-visible{outline:3px solid var(--coral,#b94131);outline-offset:4px}.ds-primary:disabled{background:#ead7c8;color:#816b68;cursor:not-allowed}"
+    },
+    {
+      "name": "Icon button",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "A quiet icon action with a usable focus target.",
+      "html": "<button class=\"ds-icon\" aria-label=\"Delete check-in\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" aria-hidden=\"true\"><path d=\"M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7\"/></svg></button>",
+      "css": ".ds-icon{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:10px;border:0;border-radius:10px;background:transparent;color:var(--ink,#3e2248);cursor:pointer}.ds-icon:hover{background:#efdcd0}.ds-icon:focus-visible{outline:3px solid var(--coral,#b94131);outline-offset:4px}"
+    },
+    {
+      "name": "Text action",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "An action beside a section title.",
+      "html": "<button class=\"ds-text\">Edit times</button>",
+      "css": ".ds-text{min-height:44px;padding:8px 0;background:transparent;border:0;color:var(--coral,#b94131);font:600 12px \"DM Sans Variable\",sans-serif;cursor:pointer}.ds-text:hover{text-decoration:underline;text-underline-offset:4px}.ds-text:focus-visible{outline:3px solid var(--coral,#b94131);outline-offset:4px}"
+    },
+    {
+      "name": "Reason field",
+      "kind": "input",
+      "refersTo": "reason-field",
+      "description": "Optional personal words in a pale rounded field.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-reason\">Your own reason</label><textarea class=\"ds-field\" id=\"ds-reason\" rows=\"2\" placeholder=\"Or put it in your own words\u2026\" maxlength=\"500\"></textarea>",
+      "css": ".ds-field-label{display:block;margin-bottom:10px;color:var(--ink,#3e2248);font:500 12px \"DM Sans Variable\",sans-serif}.ds-field{display:block;resize:vertical;min-height:92px;width:100%;padding:14px 16px;border:1px solid #cbb4aa;border-radius:12px;background:#fff9f2;color:var(--ink,#3e2248);font:14px/1.6 \"DM Sans Variable\",sans-serif;caret-color:var(--coral,#b94131)}.ds-field::placeholder{color:var(--muted,#7a626d)}.ds-field:focus-visible{outline:3px solid var(--coral,#b94131);outline-offset:4px}"
+    },
+    {
+      "name": "Reason chip",
+      "kind": "chip",
+      "refersTo": "reason-chip",
+      "description": "A suggested reason with an explicit pressed state.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">Work</button> <button class=\"ds-chip\" aria-pressed=\"true\">Me time</button>",
+      "css": ".ds-chip{min-height:40px;padding:9px 16px;border:1px solid #cbb4aa;border-radius:24px;background:transparent;color:var(--ink,#3e2248);font:12px \"DM Sans Variable\",sans-serif;cursor:pointer}.ds-chip:hover{background:var(--surface,#fbe9dc)}.ds-chip[aria-pressed=\"true\"]{background:var(--ink,#3e2248);border-color:var(--ink,#3e2248);color:var(--ground,#fff6ed)}.ds-chip:focus-visible{outline:3px solid var(--coral,#b94131);outline-offset:4px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Plum navigation with the current destination distinguished.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Demo navigation\"><button aria-current=\"page\">Today</button><button>History</button><button>Your rhythm</button></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:7px;padding:20px;background:var(--ink,#3e2248);border-radius:12px}.ds-nav button{padding:15px 18px;border:0;border-radius:12px;background:transparent;color:#e4d1e3;text-align:left;font:14px \"DM Sans Variable\",sans-serif;cursor:pointer}.ds-nav button:hover{background:#523159}.ds-nav button[aria-current=\"page\"]{background:#60416a;color:var(--ground,#fff6ed)}.ds-nav button:focus-visible{outline:3px solid #f4ad94;outline-offset:4px}"
+    },
+    {
+      "name": "Daily panel",
+      "kind": "card",
+      "refersTo": "daily-panel",
+      "description": "A flat tonal group for the day\u2019s rhythm and saved moments.",
+      "html": "<section class=\"ds-panel\"><h2>Your daily rhythm</h2><p>Three little pauses to start.</p></section>",
+      "css": ".ds-panel{padding:21px 24px 28px;border-radius:22px;background:var(--surface,#fbe9dc);color:var(--ink,#3e2248);font-family:\"DM Sans Variable\",sans-serif}.ds-panel h2{margin:0 0 12px;font-size:15px;font-weight:600;letter-spacing:-.02em}.ds-panel p{margin:0;color:var(--muted,#7a626d);font-size:12px;line-height:1.65}"
+    },
+    {
+      "name": "Mood choice",
+      "kind": "custom",
+      "description": "A labeled native radio with an expressive face.",
+      "html": "<label class=\"ds-mood\"><input type=\"radio\" name=\"ds-mood\" checked aria-label=\"Good\"><svg width=\"78\" height=\"78\" viewBox=\"0 0 56 56\" aria-hidden=\"true\"><circle cx=\"28\" cy=\"28\" r=\"26\" fill=\"#c2d7ad\"/><g fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.3\" stroke-linecap=\"round\"><path d=\"M20 20v3m16-3v3M18 29Q28 40 38 29\"/></g></svg><span>Good</span></label>",
+      "css": ".ds-mood{position:relative;display:inline-flex;flex-direction:column;align-items:center;padding:8px 8px 13px;border:1px solid transparent;border-radius:52px 52px 17px 17px;color:var(--ink,#3e2248);font:13px \"DM Sans Variable\",sans-serif;cursor:pointer}.ds-mood input{position:absolute;width:1px;height:1px;clip-path:inset(50%)}.ds-mood svg{display:block;margin-bottom:13px}.ds-mood:has(:checked){border-color:var(--ink,#3e2248);background:var(--surface,#fbe9dc)}.ds-mood:hover{background:#f8e9de}.ds-mood:has(:focus-visible){outline:3px solid var(--coral,#b94131);outline-offset:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Little moments",
+    "overview": "Warm peach ground, plum ink and navigation, coral actions, and five expressive mood faces make daily check-ins approachable. Bricolage Grotesque gives the headings a distinct voice; DM Sans keeps forms, labels, and saved entries clear.\n\nThe interface uses soft edges and crisp, flat color fields. Faces carry the expression, with a short settling motion when selected. Desktop has a persistent plum rail; mobile brings the same destinations into a fixed bottom navigation.",
+    "keyCharacteristics": [
+      "Warm peach ground with plum text and desktop navigation.",
+      "Coral primary actions and visible keyboard focus.",
+      "Five colored faces paired with written mood labels.",
+      "Rounded fields, pill reasons, and flat tonal panels.",
+      "Responsive navigation and reduced-motion support."
+    ],
+    "rules": [
+      {
+        "name": "The Labeled Feeling Rule",
+        "body": "Always pair an interactive mood face with its written label; color and facial expression do not carry the selection alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Keep the existing flat treatment for forms, navigation, and panels; reserve the implemented shadow for the floating notice.",
+        "section": "elevation & depth"
+      },
+      {
+        "name": "The Reduced Motion Rule",
+        "body": "Under `prefers-reduced-motion: reduce`, remove animations and transitions and use automatic scroll behavior, as the current stylesheet does.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do keep peach surfaces, plum structure, and coral actions in their established roles.",
+      "Do retain a written label and a non-color selected indicator for every mood choice.",
+      "Do reuse the existing SVG faces and emblem, locally loaded typefaces, and outlined icon style.",
+      "Do preserve visible keyboard focus and reduced-motion behavior across new components.",
+      "Do adapt navigation and content order at the existing mobile breakpoint."
+    ],
+    "donts": [
+      "Don't replace mood labels or selected check markers with color alone.",
+      "Don't add shadows to ordinary fields, panels, or navigation when extending the flat system.",
+      "Don't animate the selected face continuously or retain its settling animation under reduced motion.",
+      "Don't let fixed mobile navigation or notices cover the last actionable content."
+    ]
+  }
+}
