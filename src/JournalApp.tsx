@@ -161,7 +161,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
       <header className="topbar"><div className="mobile-brand"><Brand /></div><p className="today-date">{now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p><button className="account-button" aria-label="Journal options" aria-haspopup="dialog" onClick={() => setPanel('account')}><span>Hey, <strong>{journal.name}</strong></span><span className="profile-initial" aria-hidden="true">{Array.from(journal.name)[0]?.toUpperCase()}</span><SlidersHorizontal className="mobile-options-icon" size={20} /></button></header>
       <main id="main" tabIndex={-1} ref={mainRef}>
         <div className="mobile-meta"><span>{now.toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric' })}</span><span>{cloud ? 'Cloud journal' : 'Local demo'}</span></div>
-        {cloud && <div className="cloud-toolbar"><span>{cloud.busy ? 'Saving to cloud…' : 'Cloud history'} · {cloud.identity}</span><button type="button" disabled={cloud.busy || cloud.refreshing} className="text-button" onClick={cloud.refresh}>{cloud.refreshing ? 'Refreshing…' : 'Refresh history'}</button></div>}
+        {cloud && <div className="cloud-toolbar" aria-busy={cloud.busy}><span>{cloud.busy ? 'Saving to cloud…' : 'Cloud history'} · {cloud.identity}</span><button type="button" disabled={cloud.busy || cloud.refreshing} className="text-button" onClick={cloud.refresh}>{cloud.refreshing ? 'Refreshing…' : 'Refresh history'}</button></div>}
         {!panel && errorBanner}
         <div className="page-view" role="region" aria-label="Journal pages" {...swipe}>
           <div className="today-layout" hidden={view !== 'today'}>

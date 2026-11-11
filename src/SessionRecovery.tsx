@@ -1,3 +1,4 @@
+import { keepAppOpenUntil } from './appUpdates'
 import { useState } from 'react'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -10,12 +11,12 @@ export default function SessionRecovery({ client, callbackError = '' }: { client
     <summary>Keep this journal accessible</summary>
     <p>This browser remembers your private session. Your username alone won’t reopen it after signing out, clearing browser data, or changing devices.</p>
     <p>Optional: confirm a recovery email to open this same journal elsewhere. For now, use your Supabase organization-member email.</p>
-    <form onSubmit={async event => {
+    <form aria-busy={sending} onSubmit={async event => {
       event.preventDefault()
       if (sending) return
       setSending(true); setError(''); setSent(false)
       try {
-        const result = await client.auth.updateUser({ email: email.trim() }, { emailRedirectTo: new URL('/', window.location.href).href })
+        const result = await keepAppOpenUntil(client.auth.updateUser({ email: email.trim() }, { emailRedirectTo: new URL('/', window.location.href).href }))
         if (result.error) throw result.error
         setSent(true)
       } catch { setError('We couldn’t send the recovery link. Check your address and connection, then try again. Keep using this browser; your journal is unchanged.') }

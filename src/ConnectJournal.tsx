@@ -1,3 +1,4 @@
+import { keepAppOpenUntil } from './appUpdates'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, MonitorSmartphone } from 'lucide-react'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -16,7 +17,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
   const temporary = useRef<SupabaseClient | null>(null)
   const redeemed = useRef(false)
 
-  return <form className="welcome-form connect-form" onSubmit={async event => {
+  return <form aria-busy={busy} className="welcome-form connect-form" onSubmit={async event => {
     event.preventDefault()
     if (pending.current || !client || !createDeviceClient) return
     const normalized = normalizeDeviceCode(code)
@@ -31,7 +32,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
       const device = temporary.current
       let session = (await device.auth.getSession()).data.session
       if (!session) {
-        const result = await device.auth.signInAnonymously({ options: { data: { first_name: label.trim() } } })
+        const result = await keepAppOpenUntil(device.auth.signInAnonymously({ options: { data: { first_name: label.trim() } } }))
         if (result.error || !result.data.session) throw new Error('We couldn’t start a secure device connection. Check your connection and try again.')
         session = result.data.session
       }
@@ -41,7 +42,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
         if (existing.error) throw new Error('The device connection couldn’t be checked. Try again in a moment.')
         let connected = typeof existing.data === 'string' && existing.data !== session.user.id
         if (!connected) {
-          const result = await device.rpc('happi_redeem_device_code', { p_code: normalized, p_device_label: label.trim() })
+          const result = await keepAppOpenUntil(device.rpc('happi_redeem_device_code', { p_code: normalized, p_device_label: label.trim() }))
           connected = result.data?.ok === true
           if (result.error) {
             // Redemption may have committed before its response was lost. Check this PC's identity.
@@ -57,7 +58,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
       if ((await client.auth.getSession()).data.session) throw new Error('Another journal opened here while connecting. Keep using it, or use a fresh browser profile for the phone journal.')
       if (!alive.current) return
       // This is the PC's new session, never the phone's access/refresh tokens.
-      const result = await client.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token })
+      const result = await keepAppOpenUntil(client.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token }))
       if (result.error || !result.data.session) throw new Error('This PC was connected, but sign-in couldn’t finish. Keep this page open and choose Finish connecting to retry.')
     } catch (caught) { if (alive.current) setError((caught as Error).message) }
     finally { pending.current = false; if (alive.current) setBusy(false) }

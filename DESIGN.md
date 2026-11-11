@@ -249,3 +249,7 @@ The outlined Install app control becomes an icon on phone and disappears after v
 ## Connect an existing journal
 
 The Operate welcome surface separates **Connect existing journal** from creating a new username journal. Connection uses the existing pale fields, outlined coral action, plum headings and visible focus. Code entry is paired with a written device name and explicit inline errors; a failed connection keeps inputs available for retry. On the original phone, a native disclosure inside Journal options contains generation, a selectable grouped code, copy action, visible expiry and a divided connected-device list. Linked devices see an explanation rather than owner controls. No new palette, fonts, shadows or image assets are introduced.
+
+## Release updates
+
+An available release opens the existing native Panel with a plain heading, a warning to save unfinished work and **Update now / Later**. Postponing preserves the current form and leaves a compact outlined **Update available** control. On phone the reminder sits above bottom navigation and its safe area; on PC it sits in the lower-right corner. The panel reuses the current type, focus treatment and reduced-motion behavior. No extra decoration or image assets.

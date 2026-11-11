@@ -13,6 +13,7 @@ A mood journal for small daily check-ins, private cloud history, and gentle well
 - A window-sized phone and PC interface with reasons, saved moments, account options and schedule editing in pop-up panels.
 - A wider desktop workspace with a persistent navigation rail and side-by-side check-in and daily rhythm. History pages through two moments; long notes open in a detail panel.
 - An installable web app with its own window and app icon. The install button hides after confirmed installation, across reloads in the same browser profile, and inside standalone app windows.
+- New-release prompts on open phone, PC and installed-app sessions, with **Update now** and **Later**.
 - Touch swipes between Today, Little lifts and History outside forms and controls. Drag a panel header down, press Escape, or use its close button. Arrow keys move focus through navigation.
 - **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. View one daily activity at a time with Previous/Next controls. Activities are always optional; the library eventually repeats.
 - Username sessions backed by Supabase, with private cloud saves and remembered browser sessions.
@@ -42,6 +43,16 @@ On supported Macs, Safari also offers **File → Add to Dock**. Safari’s insta
 Cloud saves and history require an internet connection. There is no service worker, offline cache or offline sync queue; this avoids caching private API responses or serving stale app versions. This is a browser-installed app, not a Windows `.exe` package. Updates arrive from the live site when the app reloads online.
 
 The 192px and 512px app icons in `public/icons/` are rasterizations of the project’s authored `public/favicon.svg`, rendered at 1024px with macOS `sips`, then downsampled. Their background fills the square for maskable icon support. They contain no third-party or generated imagery.
+
+## App updates on all devices
+
+Open the live app online and reload it once to receive the update checker. After that, the app checks its public release version every minute while visible, and when you return to it or reconnect. A new release opens **An update is ready** with **Update now** and **Later**. The same postponed release leaves an **Update available** reminder without repeatedly opening its panel; a different release can prompt again.
+
+Choose **Later** to finish a check-in. **Update now** reloads the app without clearing saved journal data or the remembered sign-in. Save unfinished check-ins and schedule changes first: they are not saved automatically by an update. Reload is blocked while a save, sign-in or other marked account operation is running.
+
+The build emits `version.json` with the same release ID embedded in its JavaScript. Vercel serves that file and the entry HTML with `no-store` headers; hashed assets keep normal caching. Failed, invalid or timed-out checks retry quietly. No service worker, notification permission or push subscription is used, and version checks send no journal or account data.
+
+A device running code from before this feature needs the initial manual reload. Closed, offline or suspended apps cannot be prompted until they open or resume online. This is an in-app update prompt, not a background system notification.
 
 ## Using the fitted interface
 
@@ -99,7 +110,7 @@ npm run build  # TypeScript checks and Vite production build
 npm run preview
 ```
 
-Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails. Device tests cover independent phone/PC sessions, shared reads and writes, lost-response recovery, owner changes, one-use/expired codes, rate limits, existing-data protection, private membership tables and revocation. The device migration and physical phone-to-PC pairing have not yet been verified against the live backend.
+Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails. Update tests cover multiple open clients, matching/new versions, postpone/reopen, unchanged storage/drafts, busy operations even after their panel closes, focus/visibility/reconnection, failed checks, timeout and unmount cleanup. Device tests cover independent phone/PC sessions, shared reads and writes, lost-response recovery, owner changes, one-use/expired codes, rate limits, existing-data protection, private membership tables and revocation. The device migration and physical phone-to-PC pairing have not yet been verified against the live backend.
 
 Real username entry, a cloud mood save, and history retrieval after a full browser reload have been verified against the live backend. Recovery-email delivery and cross-device email confirmation have not been live-tested; physical mobile devices have not been tested. Installation lifecycle tests cover the prompt, cancellation, storage failures, persisted/standalone/related-app detection, reinstall offers and stale-query races. Panel tests cover nested Escape dismissal, focus, drafts, visible save failures and Undo; gesture tests cover horizontal, vertical, cancelled and form gestures. Chrome’s manifest inspector recognizes the app metadata and icons, but actual Windows installation has not been tested; the available Chrome Guest window blocks native installation.
 
@@ -116,6 +127,7 @@ The existing Vercel project `happi-day-little-moments` is connected to `Piraticy
 | `src/CloudAccount.tsx`, `src/SessionRecovery.tsx` | Username sessions, optional email login/recovery, and account lifecycle |
 | `src/ConnectJournal.tsx`, `src/DeviceConnections.tsx` | Code-based connection, owner device controls, and independent device sessions |
 | `src/cloud.ts` | Supabase configuration, granular cloud changes, and journal persistence |
+| `src/AppUpdate.tsx`, `vite.config.ts` | Release detection, optional reload prompt, and build-version artifact |
 | `src/InstallApp.tsx`, `public/manifest.webmanifest` | Browser installation prompt, fallback instructions, and standalone app metadata |
 | `src/Panel.tsx`, `src/useSectionSwipe.ts` | Native pop-up panels and guarded touch navigation |
 | `src/JournalApp.tsx` | Shared journal interface and local demo |

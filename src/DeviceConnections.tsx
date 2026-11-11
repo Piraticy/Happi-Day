@@ -1,3 +1,4 @@
+import { keepAppOpenUntil } from './appUpdates'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Copy, MonitorSmartphone, RotateCcw } from 'lucide-react'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -32,7 +33,7 @@ export default function DeviceConnections({ client, journal, supported, original
   }, [code])
   const seconds = code ? Math.max(0, Math.ceil((Date.parse(code.expires_at) - now) / 1000)) : 0
 
-  return <details className="device-connections" onToggle={event => setOpen(event.currentTarget.open)}>
+  return <details aria-busy={busy} className="device-connections" onToggle={event => setOpen(event.currentTarget.open)}>
     <summary>Connect another device</summary>
     {!supported ? <p>Device connection is being enabled. Keep this phone signed in; your existing journal is safe.</p> : !original ? <p>This device is connected to your original journal. To connect another device or remove one, open Journal options on the original phone.</p> : <>
       <p>Open the app on your PC and choose <strong>Connect existing journal</strong>. Generate a code here, then enter it on the PC. It grants access to this journal; keep it private.</p>
@@ -40,7 +41,7 @@ export default function DeviceConnections({ client, journal, supported, original
         if (pending.current) return
         pending.current = true; setBusy(true); setError(''); setCopied(false)
         try {
-          const result = await client.rpc('happi_create_device_code', { p_display_name: journal.name, p_schedule: journal.schedule })
+          const result = await keepAppOpenUntil(client.rpc('happi_create_device_code', { p_display_name: journal.name, p_schedule: journal.schedule }))
           if (result.error || !/^[A-F0-9]{20}$/.test(result.data?.code ?? '') || !Number.isFinite(Date.parse(result.data?.expires_at ?? ''))) throw new Error('A connection code couldn’t be generated. Try again in a moment.')
           if (alive.current) { setNow(Date.now()); setCode(result.data) }
         } catch (caught) { if (alive.current) setError((caught as Error).message) }
@@ -53,7 +54,7 @@ export default function DeviceConnections({ client, journal, supported, original
         if (pending.current) return
         pending.current = true; setBusy(true); setError('')
         try {
-          const result = await client.rpc('happi_revoke_device', { p_device_id: device.device_id })
+          const result = await keepAppOpenUntil(client.rpc('happi_revoke_device', { p_device_id: device.device_id }))
           if (result.error || result.data !== true) throw new Error('This device couldn’t be removed. Refresh devices and try again.')
           await load()
         } catch (caught) { if (alive.current) setError((caught as Error).message) }

@@ -1,3 +1,4 @@
+import { keepAppOpenUntil } from './appUpdates'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ArrowRight, Heart, Mail, MonitorSmartphone, RotateCcw, ShieldCheck } from 'lucide-react'
 import type { FormEvent } from 'react'
@@ -96,7 +97,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
   async function signOut() {
     if (!client || writing.current) throw new Error('Wait for the current save to finish before signing out.')
     if (user?.is_anonymous && !window.confirm('End this private session? Without a confirmed recovery email, your username cannot restore this journal after signing out. Cancel to keep access.')) return
-    const result = await client.auth.signOut({ scope: 'local' })
+    const result = await keepAppOpenUntil(client.auth.signOut({ scope: 'local' }))
     if (result.error) throw new Error('Sign-out didn’t finish. Check your connection and try again.')
     owner.current = null; epoch.current++
     setSession(null); setCloud({ owner: '', journalOwner: null, connections: false, journal: null, error: '', loading: false }); setSentTo(''); setEmailMode(false); setConnectMode(false)
@@ -112,7 +113,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
     const changes = cloudChanges(before, next)
     try {
       if (!cloud.journalOwner) throw new Error('Refresh history before saving.')
-      await repository.apply(changes, cloud.journalOwner)
+      await keepAppOpenUntil(repository.apply(changes, cloud.journalOwner))
       if (owner.current !== id || epoch.current !== operation) throw new Error('Your session changed. Sign in and try again.')
       setCloud(current => current.owner === id && current.journal ? { ...current, journal: mergeCloudChanges(current.journal, changes), error: '', loading: false } : current)
     } finally {
@@ -128,7 +129,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
     setCloud(current => ({ ...current, loading: false }))
     try {
       if (!cloud.journalOwner) throw new Error('Refresh history before importing.')
-      await repository.importEntries(local.entries, cloud.journalOwner)
+      await keepAppOpenUntil(repository.importEntries(local.entries, cloud.journalOwner))
       const loaded = await repository.load()
       if (owner.current === id && epoch.current === operation) {
         setCloud({ owner: id, journal: loaded.journal, journalOwner: loaded.ownerId, connections: loaded.connections, error: '', loading: false }); setImportedFor(id)
@@ -150,7 +151,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
     starting.current = true; setSending(true); setAuthError('')
     try {
       // shortcut: personal preview uses Supabase IP rate limits; add CAPTCHA before broader public use.
-      const result = await client.auth.signInAnonymously({ options: { data: { first_name: name } } })
+      const result = await keepAppOpenUntil(client.auth.signInAnonymously({ options: { data: { first_name: name } } }))
       if (result.error || !result.data.session) throw result.error ?? new Error('No session')
     } catch { setAuthError('We couldn’t start your journal. Check your connection and try again. Your username is still here.') }
     finally { starting.current = false; setSending(false) }
@@ -167,7 +168,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
 
   return <div className="welcome-page">
     <section className="welcome-story"><Brand /><div className="welcome-message"><h1>A little pause.<br />{' '}With you, <span>anywhere.</span></h1><p>Your feelings, your rhythm.<br />One journal, wherever the day takes you.</p><div className="welcome-faces" aria-hidden="true">{MOODS.map(mood => <MoodFace key={mood.id} mood={mood.id} />)}</div></div><p className="welcome-signoff"><Heart size={16} /> Small moments. A little more in tune.</p></section>
-    <section className="welcome-form-area">{connectMode ? <ConnectJournal client={client} createDeviceClient={createDeviceClient} onBack={() => setConnectMode(false)} /> : !emailMode ? <form className="welcome-form" onSubmit={startSession}>
+    <section className="welcome-form-area">{connectMode ? <ConnectJournal client={client} createDeviceClient={createDeviceClient} onBack={() => setConnectMode(false)} /> : !emailMode ? <form className="welcome-form" aria-busy={sending} onSubmit={startSession}>
       <h2>Your journal.<br /> Your little space.</h2>
       <p>Start a new journal with a username, or connect the history already on your phone.</p>
       <button type="button" className="connect-existing" disabled={sending} onClick={() => { setConnectMode(true); setAuthError('') }}><MonitorSmartphone size={19} />Connect existing journal <ArrowRight size={17} /></button>
@@ -178,13 +179,13 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
       <div className="demo-explanation"><ShieldCheck size={20} /><p>This browser remembers your private session. Saved check-ins go to the cloud. Your username alone cannot restore access on another device or after clearing browser data. Use Connect existing journal to open your phone’s history, or add optional email recovery inside your journal.</p></div>
       <button type="button" className="text-button" disabled={sending} onClick={() => { setEmailMode(true); setAuthError('') }}>Use an email link instead</button>
       <button type="button" className="text-button demo-switch" disabled={sending} onClick={onDemo}>Try the local demo <ArrowRight size={16} /></button>
-    </form> : <form className="welcome-form" onSubmit={async event => {
+    </form> : <form className="welcome-form" aria-busy={sending} onSubmit={async event => {
       event.preventDefault()
       if (!client || sending || cooldown) return
       setSending(true); setAuthError('')
       try {
         const address = email.trim()
-        const result = await client.auth.signInWithOtp({ email: address, options: { shouldCreateUser: false, emailRedirectTo: new URL('/', window.location.href).href } })
+        const result = await keepAppOpenUntil(client.auth.signInWithOtp({ email: address, options: { shouldCreateUser: false, emailRedirectTo: new URL('/', window.location.href).href } }))
         if (result.error) throw result.error
         setSentTo(address); setCooldown(true)
       } catch { setAuthError('We couldn’t send your sign-in link. Check the address and your connection, then try again. If this continues, email delivery may need attention.') }
