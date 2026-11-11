@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { ArrowRight, Check, ChevronDown } from 'lucide-react'
 import { makeEntry, MOODS, REASONS } from './model'
 import type { Entry, Mood, ScheduleSlot } from './model'
+import Panel from './Panel'
 import { MoodFace } from './Icons'
 
 export type SaveResult = boolean | Promise<boolean>
@@ -60,13 +61,13 @@ export default function CheckIn({ slots, entries, onSave }: Props) {
     </fieldset>
     <p className="mood-caption">{mood ? descriptions[mood] : 'Choose the feeling closest to yours.'}</p>
     <button type="button" className="reason-toggle" aria-expanded={detailsOpen} aria-controls="checkin-reasons" disabled={saving} onClick={() => setDetailsOpen(current => !current)}><span>{detailsOpen ? 'Your reason' : reasons.length || note ? 'Edit your reason' : 'Add a reason'} <span>optional</span></span><ChevronDown size={17} /></button>
-    {detailsOpen && <fieldset id="checkin-reasons" className="reason-fieldset">
+    {detailsOpen && <Panel title="Your reason" onClose={() => setDetailsOpen(false)}><fieldset id="checkin-reasons" className="reason-fieldset">
       <legend>What’s behind it? <span>optional</span></legend>
       <div className="reason-options">{REASONS.map(reason => <button type="button" disabled={saving} key={reason} aria-pressed={reasons.includes(reason)} onClick={() => setReasons(current => current.includes(reason) ? current.filter(item => item !== reason) : [...current, reason])}>{reason}</button>)}</div>
       <label className="sr-only" htmlFor="custom-reason">Your own reason</label>
       <textarea id="custom-reason" disabled={saving} placeholder="Or put it in your own words…" maxLength={500} value={note} onChange={event => setNote(event.target.value)} rows={2} />
       <div className="field-footnote"><span>A few words, or none at all.</span><span>{note.length}/500</span></div>
-    </fieldset>}
+    </fieldset><button type="button" className="primary-button reason-done" onClick={() => setDetailsOpen(false)}>Done <Check size={18} /></button></Panel>}
     {formError && <p role="alert" className="error-message">{formError}</p>}
     <button className="primary-button save-checkin" disabled={!mood || saving} type="submit">{saving ? 'Saving…' : 'Save check-in'} <ArrowRight size={20} /></button>
     <p className="save-footnote">No perfect answers. Just a moment for you.</p>

@@ -501,51 +501,175 @@ summary:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; bo
   .topbar { padding-right: 160px; }
 }
 
-/* A desktop workspace uses the window, while prose keeps a readable measure. */
-@media (min-width: 1001px) {
-  .workspace { max-width: none; padding-inline: clamp(32px, 3.4vw, 72px); }
-  .workspace > .topbar, .workspace > main, .workspace > .workspace-footer { max-width: 1500px; margin-inline: auto; }
-  .topbar { height: 88px; }
-  .install-control { top: 22px; }
-  main { padding-top: 28px; }
-  .cloud-toolbar { margin-top: -10px; margin-bottom: 18px; }
-  .checkin-intro h1 { font-size: clamp(42px, 3.4vw, 56px); }
-  .today-layout { grid-template-columns: minmax(0, 1fr) clamp(280px, 24vw, 360px); column-gap: clamp(32px, 3.4vw, 64px); }
-  .checkin-intro { margin-bottom: 24px; }
-  .checkin-form, .lift-invitation { max-width: none; }
-  .daily-panel { padding: 24px; }
-  .mood-options { gap: clamp(8px, 1vw, 20px); }
-  .mood-option { padding: 8px 6px 12px; }
-  .mood-option .mood-face { width: clamp(62px, 5.3vw, 96px); }
-  .mood-option > span:not(.mood-tick) { font-size: 14px; }
-  .moment-select label, .moment-select select { font-size: 13px; }
-  .mood-caption, .save-footnote { font-size: 12px; }
-  .mood-caption { margin-block: 12px 18px; }
-  .save-checkin { max-width: 360px; margin-top: 16px; }
-  .save-footnote { max-width: 360px; }
-  .history-page, .schedule-page, .lifts-page { max-width: none; }
-  .history-page .entry-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; align-items: start; }
-  .entry-note { max-width: 70ch; }
-  .local-import, .session-recovery { max-width: 800px; }
-}
-@media (min-width: 1201px) {
-  .schedule-page, .lifts-page { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr); column-gap: clamp(40px, 5vw, 80px); align-items: start; }
-  .schedule-page > .page-intro, .lifts-page > .page-intro { grid-column: 1; grid-row: 1 / span 6; }
-  .schedule-form { max-width: none; margin-top: 0; grid-column: 2; }
-  .lifts-daily, .lift-list, .lift-alternatives, .lifts-note, .lifts-about { grid-column: 2; }
-  .lifts-daily { margin-top: 0; min-height: 44px; }
-  .lift-alternatives { justify-self: start; }
+/* The journal is a window-sized workspace; optional depth lives in panels. */
+:root { --rail-width: 232px; --workspace-gutter: clamp(20px, 3vw, 56px); }
+[hidden] { display: none !important; }
+body:has(.app-shell) { overflow: hidden; }
+.app-shell { height: 100dvh; min-height: 0; padding: 0; }
+.sidebar { width: var(--rail-width); height: 100dvh; padding: 28px 24px 20px; overflow-y: auto; }
+.sidebar > .brand { margin-bottom: 32px; }
+.sidebar-message { padding: 24px 10px; }
+.sidebar-message > p { font-size: 24px; }
+.workspace { height: 100%; width: calc(100% - var(--rail-width)); margin-left: var(--rail-width); max-width: none; padding: 0 var(--workspace-gutter); display: flex; flex-direction: column; }
+.workspace > .topbar, .workspace > main { width: 100%; max-width: 1400px; margin-inline: auto; }
+.topbar { height: 72px; flex-shrink: 0; padding-right: 0; }
+.app-shell:has(~ .install-control) .topbar { padding-right: 148px; }
+.install-control { top: 14px; right: max(var(--workspace-gutter), calc((100vw - var(--rail-width) - 1400px) / 2)); }
+.account-button { display: flex; align-items: center; gap: 12px; padding: 4px; min-height: 44px; min-width: 44px; border: 0; border-radius: 12px; background: transparent; font-size: 13px; }
+.account-button:hover { background: var(--surface); }
+.account-button > span:first-child { max-width: 210px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-options-icon { display: none; }
+.workspace > main { padding: 14px 0 18px; min-height: 0; flex: 1; display: flex; flex-direction: column; }
+.cloud-toolbar { margin: 0 0 10px; min-height: 36px; flex-shrink: 0; }
+.cloud-toolbar .text-button { min-height: 36px; }
+main > .error-message, main > .global-error { flex-shrink: 0; max-height: 90px; overflow: auto; margin: 0 0 8px; }
+.page-view { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; touch-action: pan-y pinch-zoom; padding: 4px; margin: -4px; }
+.today-layout { height: 100%; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) clamp(270px, 25vw, 330px); grid-template-rows: auto minmax(min-content, 1fr) auto; gap: 12px 36px; align-items: stretch; }
+.checkin-intro { margin: 0; }
+.checkin-intro h1 { font-size: clamp(32px, 3.4vw, 48px); line-height: 1.04; margin-bottom: 10px; }
+.checkin-intro > p { font-size: 13px; }
+.checkin-form { max-width: none; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
+.moment-select { margin-bottom: 10px; }
+.moment-select label, .moment-select select { font-size: 12px; }
+.mood-option { padding: 8px 4px 12px; }
+.mood-option .mood-face { width: clamp(56px, 5.3vw, 82px); }
+.mood-caption { margin: 10px 0 14px; font-size: 12px; }
+.reason-toggle { min-height: 44px; }
+.save-checkin { width: 100%; max-width: none; margin-top: 14px; }
+.save-footnote { max-width: none; font-size: 11px; margin-top: 8px; }
+.daily-panel { display: flex; flex-direction: column; grid-column: 2; grid-row: 1 / span 3; min-height: 0; padding: 22px; margin: 0; overflow: hidden; }
+.daily-rhythm { flex: 1; min-height: 0; overflow: auto; }
+.today-moments-button { display: flex; align-items: center; gap: 10px; width: 100%; flex-shrink: 0; min-height: 54px; margin-top: 16px; padding: 14px 0 0; border: 0; border-top: 1px solid var(--line); background: transparent; font-size: 13px; text-align: left; }
+.today-moments-button > span:first-of-type { flex: 1; }
+.today-moments-button:hover { color: var(--coral); }
+.lift-invitation { grid-column: 1; grid-row: 3; margin: 0; min-height: 52px; padding: 10px 0; }
+.lift-invitation > span { font-size: 13px; }
+.today-empty > svg { margin: 10px 0 16px; color: var(--muted); }
+.history-page, .lifts-page { max-width: none; min-height: 100%; display: flex; flex-direction: column; }
+.history-page .page-intro h1, .lifts-page .page-intro h1 { font-size: clamp(28px, 3vw, 42px); margin-bottom: 8px; }
+.history-page .page-intro h1 br, .lifts-page .page-intro h1 br { display: none; }
+.history-toolbar { margin-top: 16px; padding-bottom: 12px; flex-shrink: 0; }
+.history-day { margin-top: 18px; }
+.history-day > h2 { font-size: 13px; }
+.history-page .entry-list { margin-top: 6px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.entry { padding-block: 14px; }
+.entry-note-preview { display: block; width: 100%; border: 0; background: transparent; padding: 0; text-align: left; }
+.entry-note-preview .entry-note { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 13px; }
+.entry-read { display: inline-flex; align-items: center; gap: 5px; color: var(--coral); font-size: 11px; padding-block: 5px; }
+.entry-note-preview:hover .entry-read { text-decoration: underline; }
+.entry-note-full { white-space: pre-wrap; overflow-wrap: anywhere; }
+.moment-detail-meta { color: var(--muted); font-size: 13px; }
+.page-controls { display: flex; align-items: center; justify-content: center; gap: 16px; padding-top: 10px; margin-top: auto; flex-shrink: 0; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.empty-history { padding-block: 30px; }
+.lifts-daily { margin-top: 16px; min-height: 0; }
+.lifts-daily p { font-size: 13px; }
+.lift-list { flex: 1; margin-top: 14px; }
+.lift-list > li { padding: 22px 0; }
+.lift-heading h2 { font-size: clamp(24px, 2.5vw, 32px); }
+.lift-list p { font-size: 16px; max-width: 65ch; }
+.lift-actions { display: flex; justify-content: space-between; gap: 16px; flex-shrink: 0; padding-top: 8px; }
+.lift-actions .text-button { font-size: 12px; }
+.notice { left: calc((100% + var(--rail-width)) / 2); max-width: calc(100vw - var(--rail-width) - 48px); }
+/* Native dialogs keep focus inside optional tasks and leave drafts in place. */
+.sheet-dialog { width: min(760px, calc(100% - 48px)); max-height: calc(100dvh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 22px; color: var(--ink); background: var(--ground); overflow: hidden; }
+.sheet-dialog[open] { display: flex; flex-direction: column; animation: panel-arrive 180ms cubic-bezier(.16, 1, .3, 1); }
+.sheet-dialog::backdrop { background: #21132880; }
+.sheet-header { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 22px; border-bottom: 1px solid var(--line); flex-shrink: 0; user-select: none; touch-action: pan-x pinch-zoom; cursor: grab; }
+.sheet-header h2 { font-family: var(--heading); font-size: 26px; line-height: 1.15; font-weight: 500; letter-spacing: -.025em; margin: 0; }
+.sheet-header .icon-button { margin-left: auto; }
+.sheet-grip { display: none; }
+.sheet-body { overflow: auto; overscroll-behavior: contain; padding: 20px 24px 24px; min-height: 0; }
+.sheet-body .reason-fieldset { padding-top: 0; }
+.sheet-body .reason-fieldset textarea { min-height: 120px; font-size: 16px; }
+.reason-done { margin: 22px 0 0; width: 100%; }
+.sheet-body .schedule-page { display: block; max-width: none; }
+.sheet-body .page-intro h1 { font-size: 28px; margin-bottom: 8px; }
+.sheet-body .page-intro h1 br { display: none; }
+.sheet-body .schedule-form { margin-top: 20px; max-width: none; }
+.sheet-body .schedule-actions { position: sticky; bottom: -24px; background: var(--ground); padding: 14px 0; margin-top: 14px; }
+.sheet-body .local-import { margin: 18px 0; }
+.account-summary { color: var(--muted); font-size: 13px; }
+.account-leave { display: flex; gap: 8px; margin-top: 16px; }
+@keyframes panel-arrive { from { transform: translateY(18px); opacity: .5; } to { transform: translateY(0); opacity: 1; } }
+@media (max-width: 1200px) { :root { --rail-width: 205px; } }
+@media (max-width: 1000px) and (min-width: 761px) {
+  :root { --rail-width: 180px; }
+  .today-layout { grid-template-columns: minmax(0, 1fr) 230px; column-gap: 22px; }
+  .daily-panel { padding: 16px; }
+  .mood-option .mood-face { width: 54px; }
+  .checkin-intro h1 { font-size: 32px; }
+  .rhythm-note { display: none; }
 }
 @media (max-width: 760px) {
-  .install-control { top: 10px; right: 68px; }
+  :root { --rail-width: 0px; }
+  .sidebar { height: auto; overflow: visible; padding: 0; }
+  .workspace { padding: 0 20px calc(70px + env(safe-area-inset-bottom)); }
+  .topbar { height: 54px; padding-right: 0 !important; }
+  .account-button { margin-left: auto; justify-content: center; }
+  .account-button > span { display: none; }
+  .mobile-options-icon { display: block; }
+  .install-control { top: 5px; right: 68px; }
+  .workspace > main { padding: 2px 0 8px; }
+  .mobile-meta { margin-bottom: 4px; }
+  .cloud-toolbar { margin-bottom: 4px; font-size: 10px; gap: 0 8px; min-height: 32px; flex-wrap: nowrap; }
+  .cloud-toolbar > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cloud-toolbar .text-button { min-height: 32px; font-size: 10px; flex-shrink: 0; }
+  .today-layout { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto minmax(min-content, 1fr) auto; gap: 4px 12px; }
+  .checkin-intro { grid-column: 1 / -1; grid-row: 1; order: initial; }
+  .checkin-intro h1 { font-size: clamp(26px, 7.5vw, 32px); margin: 0; }
+  .daily-panel { display: contents; }
+  .daily-rhythm { display: none; }
+  .mobile-rhythm { grid-column: 1 / -1; grid-row: 2; order: initial; min-height: 36px; margin: 0; font-size: 11px; }
+  .checkin-form { grid-column: 1 / -1; grid-row: 3; order: initial; }
+  .moment-select { margin-bottom: 8px; }
+  .moment-select label, .moment-select select { font-size: 12px; }
+  .mood-option { padding: 5px 3px 11px; }
+  .mood-option .mood-face { width: 54px; }
+  .reason-toggle { margin-top: 6px; font-size: 13px; }
+  .save-checkin { margin-top: 10px; }
+  .save-footnote { margin-top: 6px; font-size: 10px; }
+  .today-moments-button { grid-column: 1; grid-row: 4; margin: 0; padding: 10px 0; font-size: 11px; min-height: 44px; gap: 6px; }
+  .today-moments-button > svg:last-child { display: none; }
+  .today-moments-button .moment-count { padding: 2px 5px; min-width: 20px; }
+  .lift-invitation { grid-column: 2; grid-row: 4; order: initial; min-height: 44px; padding: 10px 0; gap: 8px; }
+  .lift-invitation > span { font-size: 11px; }
+  .lift-invitation > span > span { display: none; }
+  .lift-invitation > svg:last-child { display: none; }
+  .history-page .entry-list { display: block; }
+  .history-page .page-intro h1, .lifts-page .page-intro h1 { font-size: 28px; }
+  .history-toolbar { margin-top: 12px; padding-bottom: 8px; }
+  .history-day { margin-top: 12px; }
+  .entry { gap: 12px; padding-block: 10px; }
+  .entry > .mood-face { width: 36px; height: 36px; }
+  .entry-note-preview .entry-note { font-size: 12px; margin-top: 5px; }
+  .lifts-daily { margin-top: 12px; }
+  .lifts-daily p { font-size: 12px; }
+  .lift-list > li { padding-block: 16px; }
+  .lift-heading h2 { font-size: 24px; }
+  .lift-list p { font-size: 14px; }
+  .notice { left: 16px; right: 16px; transform: none; max-width: none; bottom: calc(80px + env(safe-area-inset-bottom)); }
+  .sheet-dialog { position: fixed; inset: auto 0 0; width: 100%; max-width: none; max-height: calc(100dvh - 16px); margin: 0; border-radius: 24px 24px 0 0; border-bottom: 0; }
+  .sheet-header { padding: 18px 16px 8px 20px; }
+  .sheet-header h2 { font-size: 24px; }
+  .sheet-grip { display: block; position: absolute; top: 8px; left: calc(50% - 18px); width: 36px; height: 4px; border-radius: 4px; background: var(--line); }
+  .sheet-body { padding: 16px 20px calc(20px + env(safe-area-inset-bottom)); }
+  .sheet-body .schedule-actions { bottom: calc(-20px - env(safe-area-inset-bottom)); }
+}
+@media (max-height: 600px) and (min-width: 761px) {
+  .sidebar-message { display: none; }
+  .topbar { height: 60px; }
+  .workspace > main { padding-block: 8px; }
+  .checkin-intro > p, .save-footnote { display: none; }
+  .checkin-intro h1 { font-size: 30px; }
+}
+
+@media (max-width: 760px) {
   .install-button { width: 44px; padding: 10px; justify-content: center; border-color: transparent; }
   .install-button > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .install-help { right: -48px; top: calc(100% + 8px); }
 }
-
-@media (min-width: 761px) and (max-height: 800px) {
-  .sidebar { padding-top: 28px; }
-  .sidebar > .brand { margin-bottom: 32px; }
-  .sidebar-message { padding: 24px 10px; }
-  .sidebar-message > p { font-size: 22px; }
-}
+.panel-notice { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 8px 12px; border-radius: 12px; background: var(--ink); color: var(--ground); font-size: 12px; }
+.panel-notice .icon-button { margin-left: auto; }
+.panel-notice .icon-button:hover { background: #60416a; }
+.panel-notice button:focus-visible { outline-color: #f4ad94; }
+.interaction-help { color: var(--muted); font-size: 12px; max-width: 65ch; }

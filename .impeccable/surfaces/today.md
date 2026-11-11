@@ -10,7 +10,7 @@ OWN-WORLD: Full palette: warm peach ground, plum ink and desktop navigation, cor
 
 STORY: Enter an explicitly labeled demo, select a mood, optionally explain it, save, and see the real entry. Editable times are a plan, not notifications.
 
-FIRST VIEWPORT: On phone, wordmark and leave control, date, clear mood question, a compact plan link, five labeled faces, optional reason disclosure, and Save check-in. Save fits 375×667 with the keyboard closed; expanded notes, history and short landscape viewports scroll naturally. Saved moments collapse. Bottom navigation reaches Today, Little lifts, History and Your rhythm. Desktop retains the plum rail and side rhythm. Mobile welcome prioritizes entry over decorative copy. Selected moods settle once; reduced motion is respected.
+FIRST VIEWPORT: On phone, wordmark and leave control, date, clear mood question, a compact plan link, five labeled faces, an optional reason panel, and Save check-in. Save fits 375×667 with the keyboard closed; long notes, history and short landscape viewports scroll inside the page or a panel when needed. Saved moments open in a panel. Bottom navigation reaches Today, Little lifts, History and Your rhythm. Desktop retains the plum rail and side rhythm. Mobile welcome prioritizes entry over decorative copy. Selected moods settle once; reduced motion is respected.
 
 LITTLE LIFTS: A separate destination for original, gentle wellbeing suggestions. Begin with one per day; increase to two and at most three across distinct check-in days. A stable calendar rotation refreshes daily; alternatives are optional. No streaks, penalties, guaranteed good mood, or activity completion tracking.
 
@@ -18,4 +18,6 @@ FORM: Grounded direction 7, everyday fruit-market color, seed:7c6537b3d26825c2. 
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
-USERNAME SESSIONS: Cloud entry defaults to a username and a remembered private session, without password/email. Explain that username is a display label and cannot reopen another device’s journal. Optional verified email recovery remains available below journal content; do not push the phone check-in down with recovery/import controls. Local demo stays separate.
+USERNAME SESSIONS: Cloud entry defaults to a username and a remembered private session, without password/email. Explain that username is a display label and cannot reopen another device’s journal. Optional verified email recovery remains available in Journal options; do not push the phone check-in down with recovery/import controls. Local demo stays separate.
+
+VIEWPORT PANELS: The user requested a fitted app window and pop-up options. Keep Today’s controls in view at 375×667 and laptop size. Native dialogs provide optional depth; failure messages and Undo must remain inside the active panel. Touch swipes outside controls change sections; no gesture saves or deletes entries. Keep draft check-ins mounted across sections. Installation promotion hides after verified installation and persists that preference, with supported related-app detection and honest browser limits.

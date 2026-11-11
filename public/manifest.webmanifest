@@ -28,5 +28,12 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "/manifest.webmanifest",
+      "id": "https://happi-day-little-moments.vercel.app/"
+    }
   ]
 }

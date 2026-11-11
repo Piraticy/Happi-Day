@@ -18,17 +18,39 @@ function enterDemo() {
 }
 
 describe('Happi-Day local demo', () => {
-  it('opens today’s saved moments on desktop and collapses them on phone', () => {
-    const media = new EventTarget() as MediaQueryList
-    Object.assign(media, { matches: true })
-    vi.stubGlobal('matchMedia', () => media)
-    try {
-      enterDemo()
-      const details = screen.getByText('Today’s moments').closest('details')!
-      expect(details.open).toBe(true)
-      act(() => { Object.assign(media, { matches: false }); media.dispatchEvent(new Event('change')) })
-      expect(details.open).toBe(false)
-    } finally { vi.unstubAllGlobals() }
+  it('opens saved moments in a panel without expanding the main page', () => {
+    enterDemo()
+    fireEvent.click(screen.getByRole('button', { name: /Today’s moments/ }))
+    expect(screen.getByRole('dialog', { name: 'Today’s moments' })).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Close today’s moments' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('swipes between sections without losing an unfinished check-in', () => {
+    enterDemo()
+    fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
+    const region = screen.getByRole('region', { name: 'Journal pages' })
+    fireEvent.pointerDown(region, { pointerType: 'touch', isPrimary: true, clientX: 280, clientY: 100, pointerId: 1 })
+    fireEvent.pointerUp(region, { pointerType: 'touch', isPrimary: true, clientX: 100, clientY: 105, pointerId: 1 })
+    expect(screen.getByRole('heading', { name: /A little lift/ })).toBeVisible()
+    fireEvent.pointerDown(region, { pointerType: 'touch', isPrimary: true, clientX: 100, clientY: 100, pointerId: 2 })
+    fireEvent.pointerUp(region, { pointerType: 'touch', isPrimary: true, clientX: 280, clientY: 105, pointerId: 2 })
+    expect(screen.getByRole('radio', { name: 'Good' })).toBeChecked()
+  })
+
+  it('ignores vertical, cancelled and form gestures', () => {
+    enterDemo()
+    const region = screen.getByRole('region', { name: 'Journal pages' })
+    fireEvent.pointerDown(region, { pointerType: 'touch', clientX: 280, clientY: 100 })
+    fireEvent.pointerUp(region, { pointerType: 'touch', clientX: 250, clientY: 260 })
+    fireEvent.pointerDown(region, { pointerType: 'touch', clientX: 280, clientY: 100 })
+    fireEvent.pointerCancel(region)
+    fireEvent.pointerUp(region, { pointerType: 'touch', clientX: 100, clientY: 100 })
+    const form = screen.getByRole('radio', { name: 'Good' }).closest('form')!
+    fireEvent.pointerDown(form, { pointerType: 'touch', clientX: 280, clientY: 100 })
+    fireEvent.pointerUp(form, { pointerType: 'touch', clientX: 100, clientY: 100 })
+    expect(screen.queryByRole('heading', { name: /A little lift/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Good' })).toBeVisible()
   })
 
   it('keeps optional reasons collapsed until requested', () => {
@@ -65,7 +87,7 @@ describe('Happi-Day local demo', () => {
     enterDemo()
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'A quiet day' } })
-    fireEvent.click(screen.getByRole('button', { name: /Your reason/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     fireEvent.click(screen.getByRole('radio', { name: 'Okay' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries[0].note).toBe('A quiet day')
@@ -78,11 +100,13 @@ describe('Happi-Day local demo', () => {
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Work' }))
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Finished a project' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
     fireEvent.click(screen.getByText('Today’s moments'))
     expect(screen.getByText('Finished a project')).toBeVisible()
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
     expect(saved.entries[0]).toMatchObject({ mood: 'good', reasons: ['Work'], note: 'Finished a project' })
+    fireEvent.click(screen.getByRole('button', { name: 'Close today’s moments' }))
     expect(screen.queryByLabelText('Your own reason')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     expect(screen.getByLabelText('Your own reason')).toHaveValue('')
@@ -126,10 +150,13 @@ describe('Happi-Day local demo', () => {
     fireEvent.click(screen.getByRole('radio', { name: 'Low' }))
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Keep these words' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     const failure = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Quota exceeded') })
     fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
     expect(screen.getByRole('alert')).toHaveTextContent(/couldn’t save/i)
+    fireEvent.click(screen.getByRole('button', { name: /Edit your reason/ }))
     expect(screen.getByLabelText('Your own reason')).toHaveValue('Keep these words')
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     failure.mockRestore()
     fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
     fireEvent.click(screen.getByText('Today’s moments'))
@@ -160,10 +187,52 @@ describe('Happi-Day local demo', () => {
     expect(screen.getByText('An earlier moment')).toBeInTheDocument()
   })
 
+  it('keeps undo and keyboard focus inside the moments panel after deletion', () => {
+    enterDemo()
+    fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: /Today’s moments/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = screen.getByRole('dialog', { name: 'Today’s moments' })
+    expect(within(dialog).getByRole('button', { name: 'Close today’s moments' })).toHaveFocus()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Undo delete' }))
+    expect(within(dialog).getByRole('article')).toBeVisible()
+  })
+
+  it('shows failed schedule saves inside the active panel', async () => {
+    enterDemo()
+    fireEvent.click(screen.getByRole('button', { name: 'Your rhythm' }))
+    fireEvent.change(screen.getByLabelText('Time for Morning'), { target: { value: '08:30' } })
+    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Save rhythm' }))
+      const dialog = screen.getByRole('dialog', { name: 'Your rhythm' })
+      expect(within(dialog).getByRole('alert')).toHaveTextContent(/couldn’t save/i)
+      expect(screen.getByLabelText('Time for Morning')).toHaveValue('08:30')
+    } finally { write.mockRestore() }
+  })
+
+  it('shows failed deletion inside the moments panel without losing the entry', async () => {
+    enterDemo()
+    fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: /Today’s moments/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Delete check-in' }))
+    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+    try {
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
+      expect(within(screen.getByRole('dialog', { name: 'Today’s moments' })).getByRole('alert')).toHaveTextContent(/couldn’t save/i)
+      expect(screen.getByRole('article')).toBeVisible()
+      expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toHaveLength(1)
+    } finally { write.mockRestore() }
+  })
+
   it('leaves the demo without removing saved entries', () => {
     enterDemo()
     fireEvent.click(screen.getByRole('radio', { name: 'Great' }))
     fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Journal options' }))
     fireEvent.click(screen.getByRole('button', { name: 'Leave demo' }))
     expect(screen.getByRole('button', { name: 'Enter demo' })).toBeInTheDocument()
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toHaveLength(1)

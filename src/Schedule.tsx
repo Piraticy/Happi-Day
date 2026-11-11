@@ -9,10 +9,11 @@ export function DailyRhythm({ slots, entries, onEdit }: { slots: ScheduleSlot[];
   return <section className="daily-rhythm">
     <div className="section-heading"><h2>Your daily rhythm</h2><button type="button" className="text-button" onClick={onEdit}>Edit times <Plus size={14} /></button></div>
     <p className="rhythm-description">{done === slots.length ? 'A little space for you, all through the day.' : `${done} of ${slots.length} planned moments checked in`}</p>
-    <ol className="daily-slots">{slots.map(slot => {
+    <ol className="daily-slots">{slots.slice(0, 3).map(slot => {
       const checked = entries.some(entry => entry.slotId === slot.id)
       return <li key={slot.id} className={checked ? 'done' : ''}><span className="slot-marker" aria-hidden="true">{checked ? <Check size={15} /> : <Clock3 size={15} />}</span><span className="slot-label">{slot.label}</span><time>{slot.time}</time><span className="slot-status">{checked ? 'Checked in' : 'Planned'}</span></li>
     })}</ol>
+    {slots.length > 3 && <button type="button" className="text-button" onClick={onEdit}>View all {slots.length} times <ArrowRight size={14} /></button>}
     <p className="rhythm-note">Your day doesn’t have to follow a plan. You can always add an extra moment.</p>
   </section>
 }
@@ -40,7 +41,7 @@ export default function Schedule({ slots, onSave }: { slots: ScheduleSlot[]; onS
     setSaved(false)
   }
   return <div className="schedule-page">
-    <div className="page-intro"><h1>A rhythm<br />that’s yours.</h1><p>Three little pauses to start. Make room for more.</p></div>
+    <div className="page-intro"><h1>A rhythm that’s yours.</h1><p>Three little pauses to start. Make room for more.</p></div>
     <form className="schedule-form" aria-busy={saving} onSubmit={async event => {
       event.preventDefault()
       if (saving) return

@@ -6,8 +6,17 @@ type InstallPrompt = Event & {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+const INSTALLED_KEY = 'happi-day:installed'
+function rememberedInstall() {
+  try { return localStorage.getItem(INSTALLED_KEY) === '1' } catch { return false }
+}
+function rememberInstall(installed: boolean) {
+  try { if (installed) localStorage.setItem(INSTALLED_KEY, '1'); else localStorage.removeItem(INSTALLED_KEY) } catch { /* Installation can still be detected in this window. */ }
+}
+type RelatedNavigator = Navigator & { getInstalledRelatedApps?: () => Promise<{ platform?: string; id?: string; url?: string }[]> }
+
 export default function InstallApp() {
-  const [installed, setInstalled] = useState(() => !!window.matchMedia?.('(display-mode: standalone)').matches || !!(navigator as Navigator & { standalone?: boolean }).standalone)
+  const [installed, setInstalled] = useState(() => !!window.matchMedia?.('(display-mode: standalone)').matches || !!(navigator as Navigator & { standalone?: boolean }).standalone || rememberedInstall())
   const button = useRef<HTMLButtonElement>(null)
   const prompt = useRef<InstallPrompt | null>(null)
   const pending = useRef(false)
@@ -16,14 +25,38 @@ export default function InstallApp() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    const capture = (event: Event) => { event.preventDefault(); prompt.current = event as InstallPrompt }
-    const complete = () => { setInstalled(true); prompt.current = null; setHelp(false) }
+    let alive = true
+    let revision = 0
+    const capture = (event: Event) => { revision++; event.preventDefault(); prompt.current = event as InstallPrompt; rememberInstall(false); setInstalled(false) }
+    const complete = () => { revision++; rememberInstall(true); setInstalled(true); prompt.current = null; setHelp(false) }
     const display = window.matchMedia?.('(display-mode: standalone)')
     const checkDisplay = () => { if (display?.matches) complete() }
+    const sync = (event: StorageEvent) => { if (event.key === INSTALLED_KEY && event.newValue === '1') complete() }
+    async function checkRelated() {
+      const requestedAt = revision
+      try {
+        const apps = await (navigator as RelatedNavigator).getInstalledRelatedApps?.()
+        const found = apps?.some(app => {
+          if (app.platform !== 'webapp') return false
+          try {
+            return (!!app.id && new URL(app.id, location.href).href === new URL('/', location.href).href) ||
+              (!!app.url && new URL(app.url, location.href).href === new URL('/manifest.webmanifest', location.href).href)
+          } catch { return false }
+        })
+        if (alive && revision === requestedAt && found) complete()
+      } catch { /* Unsupported or blocked detection must not block the journal. */ }
+    }
+    if (display?.matches || (navigator as Navigator & { standalone?: boolean }).standalone) complete()
+    void checkRelated()
+    window.addEventListener('focus', checkRelated)
+    window.addEventListener('storage', sync)
     window.addEventListener('beforeinstallprompt', capture)
     window.addEventListener('appinstalled', complete)
     display?.addEventListener('change', checkDisplay)
     return () => {
+      alive = false
+      window.removeEventListener('focus', checkRelated)
+      window.removeEventListener('storage', sync)
       window.removeEventListener('beforeinstallprompt', capture)
       window.removeEventListener('appinstalled', complete)
       display?.removeEventListener('change', checkDisplay)

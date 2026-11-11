@@ -27,7 +27,7 @@ No CAPTCHA is configured for this personal preview. Supabase's default anonymous
 
 ## Optional recovery and other devices
 
-Inside an anonymous journal, open **Keep this journal accessible** and enter a recovery email. The app calls updateUser on the current identity, preserving its user ID and rows. Check the inbox and confirm the link before signing out or changing devices. A successfully requested email is not proof of verification. An email belonging to another account will not silently merge or switch journals.
+Inside an anonymous journal, open **Journal options → Keep this journal accessible** and enter a recovery email. The app calls updateUser on the current identity, preserving its user ID and rows. Check the inbox and confirm the link before signing out or changing devices. A successfully requested email is not proof of verification. An email belonging to another account will not silently merge or switch journals.
 
 After confirmation, use **Use an email link instead** on another device with the same verified address. The SDK uses implicit-flow callback detection and refreshes persisted sessions. This email route remains optional; starting a username session never sends an email.
 

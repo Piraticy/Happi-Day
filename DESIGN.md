@@ -151,7 +151,7 @@ The palette combines warm surfaces with a dark plum structure and five distinct 
 
 Bricolage's rounded forms give large questions and the wordmark their character. DM Sans carries compact controls and supporting information. Large headings use tight tracking; labels remain sentence case.
 
-- **Display:** page headings use the frontmatter display role, becoming a fixed size (36px) at the mobile breakpoint. The welcome story uses a larger responsive heading (`clamp(44px, 5vw, 76px)`), with a mobile size (38px).
+- **Display:** page headings use the frontmatter display role, using compact phone heading sizes (26–32px on Today and28px on secondary pages). The welcome story uses a larger responsive heading (`clamp(44px, 5vw, 76px)`), with a mobile size (38px).
 - **Headline:** the welcome form heading uses the headline role, reducing on mobile (31px).
 - **Title:** section headings use the title role; entry titles are slightly larger (16px). The reason field legend is stronger (17px).
 - **Body:** default text uses the body family. Supporting prose typically ranges from 12–14px; paragraph line height is generous (1.65). The welcome introduction is larger (18px).
@@ -159,13 +159,11 @@ Bricolage's rounded forms give large questions and the wordmark their character.
 
 ## Layout
 
-The desktop app uses a fixed rail (232px) and an offset workspace with horizontal padding (58px) and a maximum width (1580px). Today places the flexible check-in beside a rhythm panel (286px), separated by a column gap (60px). History and Your rhythm use narrower content (maximum 850px); the schedule form narrows further (670px).
+The app fills the viewport, retaining the plum rail on desktop and bottom navigation at widths up to 760px. The desktop workspace uses fluid gutters and a 1400px maximum content width. The check-in sits beside a compact rhythm panel; saved moments and schedule editing open in native dialogs. Phone prioritizes the wordmark/options, date, compact sync controls, mood question, plan link, five labeled moods, optional reason button and Save. Two compact bottom actions open saved moments and Little lifts. The shell reserves space for bottom navigation and safe-area padding.
 
-At widths up to 1200px, the rail narrows (205px), workspace padding reduces (34px), and the side panel narrows (255px). From 761px through 1000px, the rail narrows again (180px) and the daily panel moves below the form as two columns. At 1600px and above, workspace padding grows (85px) and the Today column gap grows (100px).
+The main page region and dialog body allow internal scrolling for long content, enlarged text and short windows; ordinary check-ins fit375×667 and the checked laptop viewport. History pages through two moments, full notes open in a panel, and Little lifts shows one daily activity at a time. The full viewport/panel behavior is described in the final section below.
 
-At 760px and below, the rail becomes a fixed bottom navigation with safe-area padding. The workspace has side gutters (24px), a compact brand header, and a single content column. Today prioritizes the heading, a compact planned-check-in count linking to times, and the check-in form. Desktop rhythm tiles are hidden on phone; Your rhythm retains all editable times. Optional reasons expand on demand and close after a successful save. Saved moments sit behind a native disclosure. A separate Little lifts destination holds daily wellbeing activities, keeping the check-in short. The five mood choices remain in one row. The app reserves bottom space (84px) for navigation, and notices sit above it.
-
-The welcome screen changes from two columns (1.12fr / 1fr) to a compact wordmark, short headline and form at the same mobile breakpoint; decorative faces and supporting story copy are hidden on phone. The body supports a minimum width (320px). Spacing is component-specific rather than governed by an invented global grid; frontmatter records recurring steps only.
+The welcome screen retains its two-column desktop composition and compact phone entry. The body supports a minimum width of320px. Native form controls, visible focus, reduced motion, and the existing palette and typefaces remain shared across both contexts.
 
 ## Elevation & Depth
 
@@ -191,7 +189,7 @@ Reason chips are bordered pills with a minimum height (40px), reducing to 36px o
 
 ### Cards / Containers
 
-The desktop daily panel groups rhythm and saved moments in one flat peach container with the frontmatter panel padding. At narrower desktop widths padding reduces; on mobile the outer container dissolves into the ordered page flow. Saved entries are divided rows with a face, heading, time, reasons, optional note, and delete action rather than individually elevated cards.
+The desktop daily panel groups rhythm and a button opening saved moments in one flat peach container. At narrower desktop widths padding reduces; on mobile the outer container dissolves into the ordered page flow. Saved entries are divided rows with a face, heading, time, reasons, optional note, and delete action rather than individually elevated cards.
 
 ### Inputs / Fields
 
@@ -232,14 +230,18 @@ Saved and deleted confirmations use a fixed plum notice with pale text, an icon,
 
 ## Daily little lifts
 
-A separate Operate surface presents one to three short, optional activities as divided rows. The list grows across distinct check-in days, capped at three, and the 31-idea calendar rotation stays stable across reloads. Alternatives replace the visible ideas. All moods are welcome; the copy promises no particular outcome. Sources and context sit behind an About these ideas disclosure. No new colors, fonts, shadows or raster assets are introduced.
+A separate Operate surface presents one to three short, optional activities as divided rows. The list grows across distinct check-in days, capped at three, and the 31-idea calendar rotation stays stable across reloads. Alternatives replace the visible ideas. All moods are welcome; the copy promises no particular outcome. Sources and context open in an About these ideas panel. No new colors, fonts, shadows or raster assets are introduced.
 
 ## Username session entry
 
-The cloud welcome defaults to Username and Start my journal, with the remembered-browser and recovery limits explained before entry. Existing email login remains an alternate text action. The journal shows a Session label rather than a blank email address. Optional recovery and local import controls sit after the primary page content so Save remains visible on375×667. Recovery uses a native disclosure and the existing pale fields, coral text actions and visible focus treatment. Anonymous sign-out asks for confirmation because clearing that session can remove access.
+The cloud welcome defaults to Username and Start my journal, with the remembered-browser and recovery limits explained before entry. Existing email login remains an alternate text action. The journal shows a Session label rather than a blank email address. Optional recovery and local import controls sit in Journal options so Save remains visible at 375×667. Recovery uses a native disclosure and the existing pale fields, coral text actions and visible focus treatment. Anonymous sign-out asks for confirmation because clearing that session can remove access.
 
-## Desktop workspace and installation
+## Viewport workspace, panels and installation
 
-Above 1000px, the workspace uses fluid horizontal padding and up to 1500px of content, with a flexible check-in column and a 280–360px daily panel. The desktop header is 88px tall, and spacing keeps the main save action visible on a short laptop window with reasons collapsed. Today’s moments opens on desktop and collapses when crossing to a phone/tablet width; people can still toggle it. History lays out entries in two columns per day. Above 1200px, Your rhythm and Little lifts put their introduction beside the working content. Prose retains a readable measure; phone navigation and check-in order stay intact.
+The journal shell fills `100dvh`, with a persistent desktop rail and a 72px header, or a 54px phone header and reserved bottom navigation. A flexible workspace uses up to 1400px of content. Today gives the main check-in and compact rhythm separate columns on desktop; phone uses a compact rhythm link and two bottom actions for saved moments and activities. Optional forms no longer add height to the page. Long content, zoom and small landscape windows may scroll inside the page region or panel to preserve access and legibility.
 
-An outlined Install app control sits in the upper-right header area, becoming a labeled icon on phone. It captures a native browser installation offer when available, gives inline manual instructions otherwise, and disappears in a standalone app window. The help panel uses the existing ground, borders, text and focus treatments. It states online requirements and Safari’s separate-session behavior. The manifest’s 192/512px PNG icons reuse the authored smiling emblem on a fully opaque peach background, with the mark inside the maskable safe area.
+A shared native dialog handles optional reasons, saved moments, schedule editing, account controls, full notes and activity context. Desktop uses a centered peach panel; phone uses a bottom sheet with a grip. A translucent plum backdrop protects focus. Close, Escape, backdrop and deliberate downward header drag dismiss the panel. Nested Escape stops at the top panel. Focus returns to the trigger; deletion focuses a remaining control in the active panel. Errors, confirmation and Undo render inside the active panel rather than behind its inert backdrop. Reasons keep their draft when closed; the main check-in stays mounted across section navigation. Panel arrival is a short settling movement and respects reduced motion.
+
+History displays two moments per page and clamps note previews to two lines, with the complete note available through Read note. Daily little lifts shows one of the day’s one to three activities at a time. Both retain explicit page controls. Horizontal touch navigation starts outside forms and interactive controls; vertical movement, cancellation and secondary touches do not change sections. Pinch zoom stays available. Buttons remain available everywhere, and arrow keys move navigation focus.
+
+The outlined Install app control becomes an icon on phone and disappears after verified installation or standalone launch. The remembered flag is separate from journal data and contains no identity. The browser’s related-app API can detect a prior installation when supported; a fresh install offer resets the flag for reinstalling. The manifest’s self-reference uses the production app ID. Safari’s separate-storage behavior and browser detection limits are stated in the help/docs. App icons continue to derive from the authored smiling emblem.
