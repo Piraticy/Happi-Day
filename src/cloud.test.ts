@@ -45,3 +45,21 @@ describe('cloud data boundaries', () => {
     expect(() => publicConfig('https://example.supabase.co', '')).toThrow(/both/i)
   })
 })
+
+it('creates temporary connection sessions without persisting them as the main browser journal', async () => {
+  vi.stubEnv('VITE_SUPABASE_URL', 'https://device-storage-test.example')
+  vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'sb_publishable_test')
+  const id = '11111111-1111-4111-8111-111111111111'
+  const token = `${btoa(JSON.stringify({ alg: 'HS256' }))}.${btoa(JSON.stringify({ sub: id, exp: Math.floor(Date.now() / 1000) + 3600 }))}.test`
+  vi.stubGlobal('fetch', async () => Response.json({ access_token: token, refresh_token: 'temporary-test-token', expires_in: 3600, token_type: 'bearer', user: { id, is_anonymous: true, aud: 'authenticated', user_metadata: {} } }))
+  localStorage.clear()
+  const setup = cloudSetup()
+  const temporary = setup.createDeviceClient!()
+  try {
+    const result = await temporary.auth.signInAnonymously()
+    expect(result.error).toBeNull()
+    expect((await temporary.auth.getSession()).data.session?.user.id).toBe(id)
+    expect((await setup.client!.auth.getSession()).data.session).toBeNull()
+    expect(localStorage.length).toBe(0)
+  } finally { await temporary.auth.stopAutoRefresh(); await setup.client?.auth.stopAutoRefresh(); vi.unstubAllGlobals(); vi.unstubAllEnvs() }
+})

@@ -8,7 +8,7 @@ The live Supabase project `zwlaxqoyskjznycgcukm` (Happi-Day) is connected to Ver
 
 Enter a username and choose **Start my journal**. Supabase creates a private anonymous identity and persists its session in this browser. No email, password or SMTP is required. Each submitted mood saves to Supabase. Returning to the same browser restores the identity and loads history; Refresh history or refocusing the window reloads cloud changes. There is no offline write queue or realtime subscription.
 
-A username is only a display label. Another browser entering the same name creates a separate private identity. Clearing site storage, using a private browser that discards its storage, or ending the session can remove access. Sign-out requires confirmation for anonymous identities. Optional verified recovery email is required to reopen that same journal on another device. There is no global one-user cap; do not disable all sign-ups while the username-entry flow is needed.
+A username is only a display label. Another browser entering the same name creates a separate private identity. Clearing site storage, using a private browser that discards its storage, or ending the session can remove access. Sign-out requires confirmation for anonymous identities. Connect the open original journal to another device with a one-use code (see below), or use an optional verified recovery email. There is no global one-user cap; do not disable all sign-ups while the username-entry flow is needed.
 
 The client checks browser storage before creating the SDK client and before starting a session. It explicitly binds the SDK to localStorage so a cached memory-storage fallback cannot silently create an unrecoverable account. If storage was blocked at startup, allow it and reload.
 
@@ -25,7 +25,15 @@ These settings were applied in the intended project. The public Auth settings en
 
 No CAPTCHA is configured for this personal preview. Supabase's default anonymous signup IP rate limits remain in place. Add CAPTCHA before broader public use; anonymous account creation can otherwise be abused to consume project resources. Never automatically delete old anonymous accounts: they may own a real journal.
 
-## Optional recovery and other devices
+## Connect an existing phone journal to PC
+
+Apply [202611120001_device_connections.sql](../supabase/migrations/202611120001_device_connections.sql) once in the project SQL editor, after the original migration. This adds private code/membership tables and security-definer functions, then changes the existing six RLS policies to use the authenticated device’s effective journal owner. Original phone identities keep their rows. Direct access to device tables remains revoked; only authenticated RPCs can issue, redeem, list or revoke connections. Do not rerun the original migration or drop tables.
+
+Follow [Connect your devices](connect-devices.md) for the phone and PC steps. Until the new migration is applied, original journals keep their existing self-only access and device controls show setup pending. The frontend falls back only for a missing owner function, not for other database errors. No SMTP or payment is needed for device codes.
+
+The PC creates its own anonymous identity in memory. A failed code never installs a blank journal in its browser storage. Successful redemption connects that identity to the phone journal, then persists only the PC’s own authentication session. Phone authentication tokens are never transferred. The original phone can remove connected devices; their future database reads/writes are then denied. A device that already owns journal records cannot silently connect or merge them.
+
+## Optional email recovery
 
 Inside an anonymous journal, open **Journal options → Keep this journal accessible** and enter a recovery email. The app calls updateUser on the current identity, preserving its user ID and rows. Check the inbox and confirm the link before signing out or changing devices. A successfully requested email is not proof of verification. An email belonging to another account will not silently merge or switch journals.
 
@@ -59,11 +67,11 @@ These are public browser values. Never put service-role keys, secret keys, datab
 
 ## Data and verification
 
-Cloud entries remain separate from the browser-local demo. Import is always explicit and names the destination identity. The local original remains unchanged. RLS limits profiles/entries to the current auth.uid(); rows are tombstoned rather than physically deleted.
+Cloud entries remain separate from the browser-local demo. Import is always explicit and names the destination identity. The local original remains unchanged. RLS limits profiles/entries to the current identity’s effective owner: its own auth.uid() before connection, or the original journal owner after verified code redemption. Revoked devices have no effective owner. Rows are tombstoned rather than physically deleted.
 
-44 tests pass, including SDK HTTP-boundary tests for signup, remembered session reopening, failure/retry, duplicate-submit prevention, duplicate-name separation, sign-out protection, recovery-email request/error handling, and PostgreSQL ownership rules. The storage-blocked-startup regression was observed failing before the fix. Production build and diff checks pass.
+81 tests pass, including SDK HTTP-boundary tests for signup, remembered session reopening, failure/retry, duplicate-submit prevention, duplicate-name separation, sign-out protection, recovery-email request/error handling, and PostgreSQL ownership rules. Device-specific checks cover two independent SDK clients, shared saves/refreshes, invalid and expired codes, response loss after redemption, attempt limits, protected existing journals, private device tables and revoked-device denial. The storage-blocked-startup regression was observed failing before the fix. Production build and diff checks pass.
 
-A real username session was created in the local phone-preview browser against live Supabase, a test mood was saved, and full browser reload restored that session and its cloud history. Phone entry and Save were inspected at375×667. Real recovery-email delivery, confirmation and cross-device use have not been verified. Physical devices were not tested.
+A real username session was created in the local phone-preview browser against live Supabase, a test mood was saved, and full browser reload restored that session and its cloud history. Phone entry and Save were inspected at375×667. Real recovery-email delivery and confirmation have not been verified. The additional device migration is prepared and PostgreSQL-tested, but has not yet been applied to the live project. Physical phone-to-PC pairing and the new connection UI’s rendered layout have not been verified; browser automation was unavailable.
 
 Free projects can pause after a week of inactivity and may require resuming in the dashboard. Free cloud storage is not an uninterrupted-availability or backup guarantee.
 

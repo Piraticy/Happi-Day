@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -18,11 +18,18 @@ function backend() {
   let failSignup = false
   let failRecovery = false
   let sequence = 0
+  let deviceSetup = true
+  let dropRedeemResponse = false
+  const memberships = new Map<string, string | null>()
+  const codes = new Map<string, string>()
+  const profiles = new Map<string, Record<string, unknown>>()
+  const deviceLabels = new Map<string, string>()
   const users = new Map<string, Record<string, unknown>>()
   function token(id: string) { return `${btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '')}.${btoa(JSON.stringify({ sub: id, aud: 'authenticated', role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })).replace(/=/g, '')}.test` }
   const gates = new Map<string, Promise<void>>()
+  function makeClient(persistSession = true) {
   const client = createClient('https://cloud-test.example', 'sb_publishable_test', {
-    auth: { autoRefreshToken: false, detectSessionInUrl: false, storageKey: crypto.randomUUID() },
+    auth: { persistSession, autoRefreshToken: false, detectSessionInUrl: false, storageKey: crypto.randomUUID() },
     global: { fetch: async (input, init) => {
       const url = new URL(String(input))
       const headers = new Headers(init?.headers)
@@ -30,6 +37,28 @@ function backend() {
       try { owner = JSON.parse(atob((headers.get('authorization') ?? '').split('.')[1])).sub } catch { /* Public auth requests have no user token. */ }
       const body = init?.body ? JSON.parse(String(init.body)) : {}
       requests.push({ path: url.pathname, body })
+      const effective = memberships.has(owner) ? memberships.get(owner) : owner
+      if (url.pathname.endsWith('/rpc/happi_journal_owner')) return deviceSetup ? Response.json(effective) : Response.json({ code: 'PGRST202', message: 'Missing migration' }, { status: 404 })
+      if (url.pathname.endsWith('/rpc/happi_create_device_code')) {
+        if (memberships.has(owner)) return Response.json({ message: 'Original device only' }, { status: 400 })
+        const code = 'ABCD1234ABCD1234ABCD'
+        codes.set(code, owner)
+        if (!profiles.has(owner)) profiles.set(owner, { display_name: body.p_display_name, schedule: body.p_schedule })
+        return Response.json({ code, expires_at: new Date(Date.now() + 600_000).toISOString() })
+      }
+      if (url.pathname.endsWith('/rpc/happi_redeem_device_code')) {
+        const original = codes.get(String(body.p_code))
+        if (!original) return Response.json({ ok: false, message: 'That code is invalid, expired or already used.' })
+        memberships.set(owner, original); deviceLabels.set(owner, String(body.p_device_label)); codes.delete(String(body.p_code))
+        if (dropRedeemResponse) { dropRedeemResponse = false; throw new Error('Response lost after commit') }
+        return Response.json({ ok: true, owner_id: original })
+      }
+      if (url.pathname.endsWith('/rpc/happi_list_devices')) return Response.json([...memberships].filter(([, original]) => original === owner).map(([id]) => ({ device_id: id, device_label: deviceLabels.get(id), connected_at: new Date().toISOString() })))
+      if (url.pathname.endsWith('/rpc/happi_revoke_device')) {
+        const id = String(body.p_device_id)
+        if (memberships.get(id) !== owner) return Response.json(false)
+        memberships.set(id, null); return Response.json(true)
+      }
       if (url.pathname.endsWith('/signup')) {
         if (failSignup) return Response.json({ message: 'Signup unavailable' }, { status: 400 })
         const id = `anonymous-${++sequence}`
@@ -41,28 +70,33 @@ function backend() {
       if (url.pathname.endsWith('/user')) return Response.json(users.get(owner) ?? { id: owner, email: `${owner}@example.com`, user_metadata: { first_name: owner }, app_metadata: {}, aud: 'authenticated', created_at: '2026-11-10T00:00:00Z' })
       if (url.pathname.endsWith('/otp') || url.pathname.endsWith('/logout')) return Response.json({})
       if (failReads && (!init?.method || init.method === 'GET')) return Response.json({ message: 'Unavailable' }, { status: 400 })
-      if (url.pathname.endsWith('/happi_profiles')) return Response.json([])
+      const target = (url.searchParams.get('user_id') ?? '').replace(/^eq\./, '') || owner
+      if (url.pathname.endsWith('/happi_profiles')) return Response.json(effective === target && profiles.has(target) ? [profiles.get(target)] : [])
       if (url.pathname.endsWith('/happi_entries')) {
-        if (!init?.method || init.method === 'GET') { await gates.get(owner); return Response.json(entries.get(owner) ?? []) }
+        if (!init?.method || init.method === 'GET') { await gates.get(owner); return Response.json(effective === target ? (entries.get(target) ?? []).filter(entry => !entry.deleted_at) : []) }
         if (failWrites) return Response.json({ message: 'Unavailable' }, { status: 400 })
-        const current = entries.get(owner) ?? []
+        if (!effective) return Response.json({ message: 'Access removed' }, { status: 403 })
+        const current = entries.get(effective) ?? []
         for (const row of (Array.isArray(body) ? body : [body])) {
           const index = current.findIndex(entry => entry.id === row.id)
           if (index < 0) current.push(row); else current[index] = row
         }
-        entries.set(owner, current)
+        entries.set(effective, current)
         return new Response(null, { status: 201 })
       }
       return Response.json({ message: 'Unexpected test request' }, { status: 500 })
     } },
   })
   clients.push(client)
+  return client
+  }
+  const client = makeClient()
   async function login(id: string) {
     const token = `${btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '')}.${btoa(JSON.stringify({ sub: id, aud: 'authenticated', role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 })).replace(/=/g, '')}.test`
     await act(async () => { const result = await client.auth.setSession({ access_token: token, refresh_token: `refresh-${id}` }); expect(result.error).toBeNull() })
   }
   function holdReads(id: string) { let release!: () => void; gates.set(id, new Promise<void>(resolve => { release = resolve })); return release }
-  return { client, entries, requests, login, holdReads, failReads: () => { failReads = true }, failWrites: (fail: boolean) => { failWrites = fail }, failSignup: (fail: boolean) => { failSignup = fail }, failRecovery: (fail: boolean) => { failRecovery = fail } }
+  return { client, entries, requests, login, holdReads, makeClient, memberships, codes, profiles, dropRedeemResponse: () => { dropRedeemResponse = true }, deviceSetup: (enabled: boolean) => { deviceSetup = enabled }, failReads: () => { failReads = true }, failWrites: (fail: boolean) => { failWrites = fail }, failSignup: (fail: boolean) => { failSignup = fail }, failRecovery: (fail: boolean) => { failRecovery = fail } }
 }
 
 describe('real SDK integration at the network boundary', () => {
@@ -302,5 +336,117 @@ describe('real SDK integration at the network boundary', () => {
     await screen.findByRole('alert')
     expect(screen.getByRole('button', { name: 'Refresh history' })).toBeEnabled()
     await act(async () => { release(); await Promise.resolve() })
+  })
+})
+
+describe('phone-to-PC connection', () => {
+  const phoneId = '11111111-1111-4111-8111-111111111111'
+  it('opens the existing phone rows on a separately authenticated PC and saves back to that journal', async () => {
+    const server = backend()
+    server.profiles.set(phoneId, { display_name: 'Phone journal', schedule: freshJournal().schedule })
+    server.entries.set(phoneId, [{ user_id: phoneId, id: 'phone-one', mood: 'good', reasons: [], note: 'Already saved on phone', occurred_at: '2026-11-11T09:00:00.000Z', slot_id: null, deleted_at: null }])
+    await server.login(phoneId)
+    const pcClient = server.makeClient()
+    const screens = render(<><section aria-label="Phone"><CloudAccount client={server.client} onDemo={() => {}} /></section><section aria-label="PC"><CloudAccount client={pcClient} createDeviceClient={() => server.makeClient(false)} onDemo={() => {}} /></section></>)
+    const phone = within(screen.getByRole('region', { name: 'Phone' }))
+    const pc = within(screen.getByRole('region', { name: 'PC' }))
+    fireEvent.click(await phone.findByRole('button', { name: 'Journal options' }))
+    fireEvent.click(screen.getByText('Connect another device'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate connection code' }))
+    const code = await screen.findByLabelText('One-use connection code')
+    fireEvent.click(await pc.findByRole('button', { name: /Connect existing journal/ }))
+    fireEvent.change(pc.getByLabelText('Connection code'), { target: { value: (code as HTMLInputElement).value } })
+    fireEvent.click(pc.getByRole('button', { name: 'Connect my journal' }))
+    await pc.findByRole('radio', { name: 'Good' })
+    expect(within(pc.getByRole('main')).getByText('Connected: Phone journal', { exact: false })).toBeVisible()
+    const pcUser = (await pcClient.auth.getSession()).data.session!.user.id
+    expect(pcUser).not.toBe(phoneId)
+    expect(server.memberships.get(pcUser)).toBe(phoneId)
+    fireEvent.click(pc.getByRole('button', { name: 'History' }))
+    expect(pc.getByText('Already saved on phone')).toBeVisible()
+    fireEvent.click(pc.getByRole('button', { name: 'Today' }))
+    fireEvent.click(pc.getByRole('radio', { name: 'Okay' }))
+    fireEvent.click(pc.getByRole('button', { name: 'Save check-in' }))
+    await waitFor(() => expect(server.entries.get(phoneId)).toHaveLength(2))
+    fireEvent.click(screen.getByRole('button', { name: 'Close your journal' }))
+    fireEvent.click(phone.getByRole('button', { name: 'Refresh history' }))
+    fireEvent.click(phone.getByRole('button', { name: 'History' }))
+    await waitFor(() => expect(phone.getAllByRole('article')).toHaveLength(2))
+    expect(server.entries.has(pcUser)).toBe(false)
+    expect(server.requests.some(request => request.path.endsWith('/otp'))).toBe(false)
+    screens.unmount()
+  })
+
+  it('recovers when redemption commits but the response is lost', async () => {
+    const server = backend()
+    server.codes.set('ABCD1234ABCD1234ABCD', phoneId)
+    server.profiles.set(phoneId, { display_name: 'Phone journal', schedule: freshJournal().schedule })
+    server.dropRedeemResponse()
+    render(<CloudAccount client={server.client} createDeviceClient={() => server.makeClient(false)} onDemo={() => {}} />)
+    fireEvent.click(await screen.findByRole('button', { name: /Connect existing journal/ }))
+    fireEvent.change(screen.getByLabelText('Connection code'), { target: { value: 'ABCD1234ABCD1234ABCD' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Connect my journal' }))
+    await screen.findByRole('radio', { name: 'Good' })
+    const id = (await server.client.auth.getSession()).data.session!.user.id
+    expect(server.memberships.get(id)).toBe(phoneId)
+    expect(server.requests.filter(request => request.path.endsWith('/signup'))).toHaveLength(1)
+  })
+
+  it('keeps a failed code out of persisted PC auth and reuses its temporary session on retry', async () => {
+    const server = backend()
+    render(<CloudAccount client={server.client} createDeviceClient={() => server.makeClient(false)} onDemo={() => {}} />)
+    fireEvent.click(await screen.findByRole('button', { name: /Connect existing journal/ }))
+    fireEvent.change(screen.getByLabelText('Connection code'), { target: { value: '0000-0000-0000-0000-0000' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Connect my journal' }))
+    await screen.findByRole('alert')
+    expect((await server.client.auth.getSession()).data.session).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Connect my journal' }))
+    await waitFor(() => expect(server.requests.filter(request => request.path.endsWith('/rpc/happi_redeem_device_code'))).toHaveLength(2))
+    expect(server.requests.filter(request => request.path.endsWith('/signup'))).toHaveLength(1)
+    expect(screen.getByLabelText('Connection code')).toHaveValue('0000-0000-0000-0000-0000')
+  })
+
+  it('keeps legacy phone history working before the migration is installed', async () => {
+    const server = backend(); server.deviceSetup(false)
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    await server.login('legacy')
+    fireEvent.click(await screen.findByRole('radio', { name: 'Good' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    await waitFor(() => expect(server.entries.get('legacy')).toHaveLength(1))
+    fireEvent.click(screen.getByRole('button', { name: 'Journal options' }))
+    fireEvent.click(screen.getByText('Connect another device'))
+    expect(screen.getByText(/Device connection is being enabled/)).toBeVisible()
+  })
+
+  it('clears private drafts when the effective journal changes on refresh', async () => {
+    const server = backend()
+    const other = '22222222-2222-4222-8222-222222222222'
+    server.memberships.set('pc', phoneId)
+    server.profiles.set(other, { display_name: 'Other journal', schedule: freshJournal().schedule })
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    await server.login('pc')
+    fireEvent.click(await screen.findByRole('radio', { name: 'Good' }))
+    fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
+    fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'A draft for the earlier owner' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
+    server.memberships.set('pc', other)
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh history' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Journal options' })).toHaveTextContent('Other journal'))
+    expect(screen.getByRole('radio', { name: 'Good' })).not.toBeChecked()
+    fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
+    expect(screen.getByLabelText('Your own reason')).toHaveValue('')
+  })
+
+  it('retains a draft and reports removed access instead of saving to a blank journal', async () => {
+    const server = backend()
+    server.memberships.set('pc', phoneId)
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    await server.login('pc')
+    fireEvent.click(await screen.findByRole('radio', { name: 'Okay' }))
+    server.memberships.set('pc', null)
+    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/connection was removed/)
+    expect(screen.getByRole('radio', { name: 'Okay' })).toBeChecked()
+    expect(server.entries.size).toBe(0)
   })
 })

@@ -7,5 +7,5 @@ import InstallApp from './InstallApp'
 export default function App() {
   const [setup] = useState(cloudSetup)
   const [demo, setDemo] = useState(!setup.client)
-  return <>{demo ? <JournalApp onCloudLogin={() => setDemo(false)} /> : <CloudAccount client={setup.client} setupError={setup.error} onDemo={() => setDemo(true)} />}<InstallApp /></>
+  return <>{demo ? <JournalApp onCloudLogin={() => setDemo(false)} /> : <CloudAccount client={setup.client} createDeviceClient={setup.createDeviceClient} setupError={setup.error} onDemo={() => setDemo(true)} />}<InstallApp /></>
 }

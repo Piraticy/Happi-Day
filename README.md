@@ -16,6 +16,7 @@ A mood journal for small daily check-ins, private cloud history, and gentle well
 - Touch swipes between Today, Little lifts and History outside forms and controls. Drag a panel header down, press Escape, or use its close button. Arrow keys move focus through navigation.
 - **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. View one daily activity at a time with Previous/Next controls. Activities are always optional; the library eventually repeats.
 - Username sessions backed by Supabase, with private cloud saves and remembered browser sessions.
+- Connect an existing phone journal to a PC using a private, one-use code; no email or password required. Requires the additional device-connection migration.
 - Optional verified email recovery and explicit import of browser-local demo entries.
 
 ## Username sessions and recovery
@@ -24,7 +25,9 @@ With Supabase configured, enter a username and choose **Start my journal**. No p
 
 **A username is a display label, not a login credential.** Entering the same username in another browser creates a different private journal. Signing out or clearing browser data can remove access to an anonymous journal. The app warns before anonymous sign-out.
 
-To access the same journal on another device, open **Journal options → Keep this journal accessible**, add a recovery email, and confirm its link before leaving the original session. Then use **Use an email link instead** on the other device. Sending a recovery link does not mean the email has been verified.
+To access your open phone journal on a PC without email, follow [Connect your devices](docs/connect-devices.md). On the phone, choose **Journal options → Connect another device → Generate connection code**. On the PC welcome screen, choose **Connect existing journal** and enter that code. The phone stays signed in, and both devices read and save the same cloud history. Codes expire after ten minutes and work once. Apply the additional SQL migration below before pairing.
+
+Optional email recovery remains available: open **Journal options → Keep this journal accessible**, add an email, and confirm its link before leaving the original session. Then use **Use an email link instead** on the other device. Sending a recovery link does not mean the email has been verified.
 
 History refreshes when the window regains focus or you choose **Refresh history**. There is no offline write queue or realtime subscription. Failed saves preserve the current check-in draft for retry.
 
@@ -34,7 +37,7 @@ Open the [live app](https://happi-day-little-moments.vercel.app/) in a regular *
 
 Installation is remembered only after `appinstalled`, standalone launch or a positive browser installation check. A newly available native install offer clears the remembered flag, so reinstalling remains possible. Supporting browsers can also find an older installation through the manifest’s self-reference and `getInstalledRelatedApps()`; other browsers may not expose an installation made elsewhere. See [Chrome’s detection guide](https://developer.chrome.com/docs/capabilities/get-installed-related-apps). Safari’s installed window hides the button, but a regular Safari tab cannot reliably enumerate its Dock apps.
 
-On supported Macs, Safari also offers **File → Add to Dock**. Safari’s installed app has separate local storage: **confirm a recovery email before installing if you want to reopen an existing journal**, then use email login in the installed app. A username cannot recover it. See [WebKit’s storage explanation](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/).
+On supported Macs, Safari also offers **File → Add to Dock**. Safari’s installed app has separate local storage: keep the original journal open, then use a connection code to open it in the installed app, or confirm a recovery email and use email login. A username alone cannot recover it. See [WebKit’s storage explanation](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/).
 
 Cloud saves and history require an internet connection. There is no service worker, offline cache or offline sync queue; this avoids caching private API responses or serving stale app versions. This is a browser-installed app, not a Windows `.exe` package. Updates arrive from the live site when the app reloads online.
 
@@ -42,7 +45,7 @@ The 192px and 512px app icons in `public/icons/` are rasterizations of the proje
 
 ## Using the fitted interface
 
-**Journal options** is the profile/settings control at the top-right. It contains recovery, optional demo import, and sign-out. Reasons and Today’s moments open over the check-in without expanding the page; closing the reason panel retains the draft. Switching sections also keeps the unfinished check-in. Save still submits the entry explicitly.
+**Journal options** is the profile/settings control at the top-right. It contains device connections, recovery, optional demo import, and sign-out. Reasons and Today’s moments open over the check-in without expanding the page; closing the reason panel retains the draft. Switching sections also keeps the unfinished check-in. Save still submits the entry explicitly.
 
 The shell fills the available viewport. Long lists and details scroll inside their own content area or panel when needed, including short landscape windows, enlarged text and soft keyboards. Content is not clipped merely to eliminate scrolling. The everyday check-in was visually checked at 375×667 and on a laptop-sized desktop window.
 
@@ -65,7 +68,7 @@ Without Supabase environment variables, the app opens a clearly labeled local de
 
 Follow the [Supabase setup guide](docs/supabase-setup.md) for the full procedure.
 
-1. Create a Supabase project and run [the database migration](supabase/migrations/202611100001_cloud_journal.sql) once. It creates profiles, mood entries, validation rules, and row-level security policies restricting records to their owner's `auth.uid()`.
+1. Create a Supabase project and run [the database migration](supabase/migrations/202611100001_cloud_journal.sql) once. It creates profiles, mood entries, validation rules, and row-level security policies restricting records to their owner's `auth.uid()`. Then run [the device-connection migration](supabase/migrations/202611120001_device_connections.sql) once to allow explicitly connected devices to access that same owner's journal. This keeps existing identities and data in place; it does not copy rows or open public access.
 2. Enable **Allow new users to sign up**, **Allow anonymous sign-ins**, and **Allow manual linking** in Authentication → Sign In / Providers. Keep **Confirm email** enabled.
 3. Copy `.env.example` to `.env.local` and set the public connection values:
 
@@ -96,7 +99,7 @@ npm run build  # TypeScript checks and Vite production build
 npm run preview
 ```
 
-Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails.
+Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails. Device tests cover independent phone/PC sessions, shared reads and writes, lost-response recovery, owner changes, one-use/expired codes, rate limits, existing-data protection, private membership tables and revocation. The device migration and physical phone-to-PC pairing have not yet been verified against the live backend.
 
 Real username entry, a cloud mood save, and history retrieval after a full browser reload have been verified against the live backend. Recovery-email delivery and cross-device email confirmation have not been live-tested; physical mobile devices have not been tested. Installation lifecycle tests cover the prompt, cancellation, storage failures, persisted/standalone/related-app detection, reinstall offers and stale-query races. Panel tests cover nested Escape dismissal, focus, drafts, visible save failures and Undo; gesture tests cover horizontal, vertical, cancelled and form gestures. Chrome’s manifest inspector recognizes the app metadata and icons, but actual Windows installation has not been tested; the available Chrome Guest window blocks native installation.
 
@@ -111,6 +114,7 @@ The existing Vercel project `happi-day-little-moments` is connected to `Piraticy
 | Path | Purpose |
 | --- | --- |
 | `src/CloudAccount.tsx`, `src/SessionRecovery.tsx` | Username sessions, optional email login/recovery, and account lifecycle |
+| `src/ConnectJournal.tsx`, `src/DeviceConnections.tsx` | Code-based connection, owner device controls, and independent device sessions |
 | `src/cloud.ts` | Supabase configuration, granular cloud changes, and journal persistence |
 | `src/InstallApp.tsx`, `public/manifest.webmanifest` | Browser installation prompt, fallback instructions, and standalone app metadata |
 | `src/Panel.tsx`, `src/useSectionSwipe.ts` | Native pop-up panels and guarded touch navigation |
