@@ -98,7 +98,7 @@ Username sessions do not require SMTP. Supabase's built-in email sender supports
 
 The local demo stores entries and preferences in localStorage under `happi-day:v1`; its active demo state uses sessionStorage. Everyone using that browser and origin shares this demo journal. Leaving the demo keeps entries; clearing site data removes them.
 
-Cloud journals use separate Supabase identities and owner-based access rules. Demo entries are never uploaded automatically. **Import local entries** is an explicit choice, preserves the local original, and skips existing entry IDs. Localhost and the hosted site are separate browser origins.
+Cloud journals use separate Supabase identities and owner-based access rules. Demo entries are never uploaded automatically. **Add demo entries** is an explicit choice, preserves the local original, and skips existing entry IDs. Localhost and the hosted site are separate browser origins.
 
 Deleting a cloud entry creates a tombstone; undo restores it. Unreadable local data blocks writes rather than silently replacing the journal. Calendar days follow the device's local time zone.
 

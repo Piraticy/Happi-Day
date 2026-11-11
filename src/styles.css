@@ -672,7 +672,6 @@ main > .error-message, main > .global-error { flex-shrink: 0; max-height: 90px; 
 .panel-notice .icon-button { margin-left: auto; }
 .panel-notice .icon-button:hover { background: #60416a; }
 .panel-notice button:focus-visible { outline-color: #f4ad94; }
-.interaction-help { color: var(--muted); font-size: 12px; max-width: 65ch; }
 /* Connect to the existing journal instead of creating a second one by name. */
 .connect-existing { width: 100%; display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 14px 16px; margin: 0 0 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-align: left; font-size: 14px; font-weight: 600; }
 .connect-existing > svg:last-child { margin-left: auto; }

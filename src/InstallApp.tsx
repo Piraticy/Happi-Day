@@ -89,8 +89,8 @@ export default function InstallApp() {
       <div className="section-heading"><h2>Little moments, on your desktop.</h2><button className="icon-button" type="button" aria-label="Close install help" onClick={closeHelp}><X size={18} /></button></div>
       {message && <p role="status">{message}</p>}
       <p>In Chrome or Edge, use the install icon in the address bar, or choose the install option in the browser’s menu. On a Mac, Safari offers File → Add to Dock.</p>
-      <p>It opens in its own window. Cloud saves and history need an internet connection.</p>
-      <p>Use the same browser profile to keep your session. Safari’s Dock app starts a separate session. To reopen an existing journal there or on another device, confirm a recovery email first.</p>
+      <p>You’ll need an internet connection to save and view your journal.</p>
+      <p>After installing, choose Connect existing journal to open your saved moments. Keep your journal open on your other device until you’re connected.</p>
     </section>}
   </div>
 }

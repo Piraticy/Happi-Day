@@ -111,7 +111,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
     void afterSave(save({ ...journal, entries: [...journal.entries, deleted] }), () => { setDeleted(null); setNotice('Check-in restored.') })
   }}>Undo delete</button>}<button className="icon-button" aria-label="Dismiss confirmation" onClick={() => { setNotice(''); setDeleted(null) }}><X size={16} /></button></div>
 
-  if (!loaded.journal) return <div className="recovery-page"><Brand /><div className="recovery-content"><BookOpen size={38} strokeWidth={1.4} /><h1>Your moments<br />are worth keeping.</h1><p role="alert" className="error-message">{loaded.error}</p><p>We’ve paused changes to protect your journal. If browser storage is blocked, allow it and try again.</p><button className="primary-button" onClick={() => setLoaded(load())}>Try again <RotateCcw size={18} /></button></div></div>
+  if (!loaded.journal) return <div className="recovery-page"><Brand /><div className="recovery-content"><BookOpen size={38} strokeWidth={1.4} /><h1>Your moments<br />are worth keeping.</h1><p role="alert" className="error-message">{loaded.error}</p><p>Your journal hasn’t been changed. Try again when this site can save data.</p><button className="primary-button" onClick={() => setLoaded(load())}>Try again <RotateCcw size={18} /></button></div></div>
 
   if (!active) return <div className="welcome-page">
     <section className="welcome-story">
@@ -129,15 +129,15 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         }
       }}>
         <h2>Your day.<br /> Your space.</h2>
-        <span className="demo-label">Local demo</span>
+        <span className="demo-label">Demo</span>
         <p>A moment to notice how you’re doing.<br />No password to remember.</p>
         <label htmlFor="first-name">Your first name</label>
         <input id="first-name" autoComplete="given-name" placeholder="What should we call you?" value={name} onChange={event => setName(event.target.value)} maxLength={40} required />
         {error && <p role="alert" className="error-message">{error}</p>}
         <button className="primary-button" type="submit">Enter demo <ArrowRight size={20} /></button>
         {cloud?.accountControls}
-        {onCloudLogin && <button className="text-button" type="button" onClick={onCloudLogin}>Sign in to sync across devices</button>}
-        <div className="demo-explanation"><ShieldCheck size={20} /><p>This is a local preview, not a real account. Your name and mood entries stay on this browser. Anyone using this browser can access them.</p></div>
+        {onCloudLogin && <button className="text-button" type="button" onClick={onCloudLogin}>Sign in to your journal</button>}
+        <div className="demo-explanation"><ShieldCheck size={20} /><p>Demo entries stay in this browser. Anyone using it can see them.</p></div>
         <p className="welcome-return-note">{journal.entries.length ? 'Welcome back. Your saved moments are still here.' : 'Start with three daily check-ins. Add more whenever you need.'}</p>
       </form>
     </section>
@@ -155,13 +155,13 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         event.preventDefault()
         buttons[(index + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : buttons.length - 1)) % buttons.length].focus()
       }}>{pages.map(({ id, label, Icon }) => <button key={id} className={view === id ? 'active' : ''} aria-current={view === id ? 'page' : undefined} aria-haspopup={id === 'rhythm' ? 'dialog' : undefined} onClick={() => navigate(id)}><Icon size={20} strokeWidth={1.7} /><span>{label}</span></button>)}</nav>
-      <div className="sidebar-bottom"><div className="sidebar-message"><Heart size={23} strokeWidth={1.4} /><p>Every feeling<br />has a place here.</p></div><span className="sidebar-demo">{cloud ? 'Personal cloud journal' : 'Local demo · this browser only'}</span><p className="leave-note">{cloud ? cloud.identity : 'Your moments stay on this browser.'}</p></div>
+      <div className="sidebar-bottom"><div className="sidebar-message"><Heart size={23} strokeWidth={1.4} /><p>Every feeling<br />has a place here.</p></div><span className="sidebar-demo">{cloud ? 'Your journal' : 'Demo · only here'}</span><p className="leave-note">{cloud ? cloud.identity : 'Your moments stay on this browser.'}</p></div>
     </aside>
     <div className="workspace">
       <header className="topbar"><div className="mobile-brand"><Brand /></div><p className="today-date">{now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p><button className="account-button" aria-label="Journal options" aria-haspopup="dialog" onClick={() => setPanel('account')}><span>Hey, <strong>{journal.name}</strong></span><span className="profile-initial" aria-hidden="true">{Array.from(journal.name)[0]?.toUpperCase()}</span><SlidersHorizontal className="mobile-options-icon" size={20} /></button></header>
       <main id="main" tabIndex={-1} ref={mainRef}>
-        <div className="mobile-meta"><span>{now.toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric' })}</span><span>{cloud ? 'Cloud journal' : 'Local demo'}</span></div>
-        {cloud && <div className="cloud-toolbar" aria-busy={cloud.busy}><span>{cloud.busy ? 'Saving to cloud…' : 'Cloud history'} · {cloud.identity}</span><button type="button" disabled={cloud.busy || cloud.refreshing} className="text-button" onClick={cloud.refresh}>{cloud.refreshing ? 'Refreshing…' : 'Refresh history'}</button></div>}
+        <div className="mobile-meta"><span>{now.toLocaleDateString([], { weekday: 'short', month: 'long', day: 'numeric' })}</span><span>{cloud ? 'Your journal' : 'Demo'}</span></div>
+        {cloud && <div className="cloud-toolbar" aria-busy={cloud.busy}><span>{cloud.busy ? 'Saving…' : cloud.identity}</span><button type="button" disabled={cloud.busy || cloud.refreshing} className="text-button" onClick={cloud.refresh}>{cloud.refreshing ? 'Refreshing…' : 'Refresh history'}</button></div>}
         {!panel && errorBanner}
         <div className="page-view" role="region" aria-label="Journal pages" {...swipe}>
           <div className="today-layout" hidden={view !== 'today'}>
@@ -183,7 +183,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
       {errorBanner}
       {panel === 'moments' && (todayEntries.length ? <EntryList entries={todayEntries} onDelete={removeEntry} /> : <div className="today-empty"><Heart size={24} /><p>A fresh page for today.</p><span>Your first check-in will live here.</span></div>)}
       {panel === 'rhythm' && <Schedule slots={journal.schedule} onSave={slots => save({ ...journal, schedule: slots })} />}
-      {panel === 'account' && <><p className="account-summary">{cloud ? cloud.identity : `Local demo · ${journal.name}`}</p>{cloud?.accountControls}{onCloudLogin && <button className="text-button" type="button" onClick={onCloudLogin}>Sign in to sync across devices</button>}<p className="interaction-help">Swipe across an open area to change sections. Pull a panel’s header down to close it, or use its close button. On a keyboard, Escape closes the top panel.</p><button className="text-button account-leave" disabled={cloud?.busy} onClick={leave}><LogOut size={18} />{cloud ? 'Sign out' : 'Leave demo'}</button></>}
+      {panel === 'account' && <><p className="account-summary">{cloud ? cloud.identity : `Demo · ${journal.name}`}</p>{cloud?.accountControls}{onCloudLogin && <button className="text-button" type="button" onClick={onCloudLogin}>Sign in to your journal</button>}<button className="text-button account-leave" disabled={cloud?.busy} onClick={leave}><LogOut size={18} />{cloud ? 'Sign out' : 'Leave demo'}</button></>}
       {confirmation}
     </Panel>}
     {!panel && confirmation}

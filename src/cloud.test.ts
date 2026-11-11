@@ -10,7 +10,7 @@ describe('cloud data boundaries', () => {
     try {
       const setup = cloudSetup()
       expect(setup.client).toBeNull()
-      expect(setup.error).toMatch(/browser storage.*reload/i)
+      expect(setup.error).toMatch(/allow this site to save data.*reload/i)
       blocked.mockRestore()
       const restored = cloudSetup()
       expect(restored.error).toBe('')
@@ -40,9 +40,9 @@ describe('cloud data boundaries', () => {
   it('accepts only public browser configuration and reports incomplete setup', () => {
     expect(publicConfig('', '')).toBeNull()
     expect(publicConfig('https://example.supabase.co', 'sb_publishable_example')).toEqual({ url: 'https://example.supabase.co', key: 'sb_publishable_example' })
-    expect(() => publicConfig('https://example.supabase.co', 'sb_secret_do_not_expose')).toThrow(/publishable/i)
-    expect(() => publicConfig('http://insecure.example', 'sb_publishable_example')).toThrow(/https/i)
-    expect(() => publicConfig('https://example.supabase.co', '')).toThrow(/both/i)
+    expect(() => publicConfig('https://example.supabase.co', 'sb_secret_do_not_expose')).toThrow(/sign-in isn’t ready/i)
+    expect(() => publicConfig('http://insecure.example', 'sb_publishable_example')).toThrow(/isn’t secure/i)
+    expect(() => publicConfig('https://example.supabase.co', '')).toThrow(/setup is incomplete/i)
   })
 })
 

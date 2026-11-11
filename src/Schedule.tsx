@@ -65,7 +65,7 @@ export default function Schedule({ slots, onSave }: { slots: ScheduleSlot[]; onS
       {error && <p role="alert" className="error-message">{error}</p>}
       {saved && <p role="status" className="inline-success"><Check size={18} /> Your rhythm saved.</p>}
       <div className="schedule-actions"><button disabled={saving} type="submit" className="primary-button">{saving ? 'Saving…' : 'Save rhythm'} <ArrowRight size={18} /></button>{changed && <span className="unsaved-note">Changes aren’t saved yet.</span>}</div>
-      <p className="schedule-explanation"><Clock3 size={18} /><span>These times are a personal plan. Notifications aren’t enabled. Extra check-ins are always welcome.</span></p>
+      <p className="schedule-explanation"><Clock3 size={18} /><span>Your daily plan. Reminders aren’t available yet.</span></p>
     </form>
   </div>
 }

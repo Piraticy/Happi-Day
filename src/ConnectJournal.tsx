@@ -25,7 +25,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
     if (!label.trim() || label.trim().length > 40) { setError('Name this device using 1–40 characters.'); return }
     pending.current = true; setBusy(true); setError('')
     try {
-      if ((await client.auth.getSession()).data.session) throw new Error('Another journal is already open here. Use a fresh browser profile to connect without replacing its session.')
+      if ((await client.auth.getSession()).data.session) throw new Error('Another journal is open here. Use a different browser to keep both journals.')
       if (!alive.current) return
       // Keep a failed/expired code from installing a blank anonymous journal in this browser.
       temporary.current ??= createDeviceClient()
@@ -33,12 +33,12 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
       let session = (await device.auth.getSession()).data.session
       if (!session) {
         const result = await keepAppOpenUntil(device.auth.signInAnonymously({ options: { data: { first_name: label.trim() } } }))
-        if (result.error || !result.data.session) throw new Error('We couldn’t start a secure device connection. Check your connection and try again.')
+        if (result.error || !result.data.session) throw new Error('We couldn’t connect. Check your internet connection and try again.')
         session = result.data.session
       }
       if (!redeemed.current) {
         const existing = await device.rpc('happi_journal_owner')
-        if (existing.error?.code === 'PGRST202') throw new Error('Device connection is not enabled yet. Keep your phone signed in and finish the Supabase setup first.')
+        if (existing.error?.code === 'PGRST202') throw new Error('Connecting devices isn’t available yet. Keep your journal open on your phone and try again later.')
         if (existing.error) throw new Error('The device connection couldn’t be checked. Try again in a moment.')
         let connected = typeof existing.data === 'string' && existing.data !== session.user.id
         if (!connected) {
@@ -55,7 +55,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
         if (alive.current) setJoined(true)
       }
       if (!alive.current) return
-      if ((await client.auth.getSession()).data.session) throw new Error('Another journal opened here while connecting. Keep using it, or use a fresh browser profile for the phone journal.')
+      if ((await client.auth.getSession()).data.session) throw new Error('Another journal opened here. Use a different browser to connect your phone’s journal.')
       if (!alive.current) return
       // This is the PC's new session, never the phone's access/refresh tokens.
       const result = await keepAppOpenUntil(client.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token }))
@@ -71,9 +71,9 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
     <label htmlFor="device-name">Name this device</label>
     <input id="device-name" value={label} onChange={event => setLabel(event.target.value)} maxLength={40} disabled={busy || joined} required autoComplete="off" />
     {error && <p className="error-message" role="alert">{error}</p>}
-    {!createDeviceClient && <p className="error-message" role="alert">Device connection is unavailable in this preview.</p>}
+    {!createDeviceClient && <p className="error-message" role="alert">Connecting devices isn’t available here yet.</p>}
     <button className="primary-button" type="submit" disabled={busy || !client || !createDeviceClient}>{busy ? 'Connecting…' : joined ? 'Finish connecting' : 'Connect my journal'}<ArrowRight size={19} /></button>
-    <p className="auth-help">Codes expire after 10 minutes and work once. Your phone keeps its data and stays signed in. Each device saves to the same cloud journal.</p>
+    <p className="auth-help">This code works once and expires in 10 minutes. Your phone stays signed in.</p>
     <button type="button" className="text-button" disabled={busy} onClick={onBack}>Back to journal entry</button>
   </form>
 }

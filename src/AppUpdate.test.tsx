@@ -33,7 +33,7 @@ it('prompts two open device clients for the same new deployment', async () => {
   render(<><AppUpdate currentVersion="current" onUpdate={vi.fn()} /><AppUpdate currentVersion="current" onUpdate={vi.fn()} /></>)
   await flush()
   expect(screen.getAllByRole('dialog', { name: 'An update is ready' })).toHaveLength(2)
-  expect(screen.getAllByText(/Save any unfinished check-in or changes before updating/)).toHaveLength(2)
+  expect(screen.getAllByText(/Save your unfinished check-in or changes first/)).toHaveLength(2)
 })
 
 it('Later preserves a draft and remembered session, and can reopen the update prompt', async () => {

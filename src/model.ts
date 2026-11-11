@@ -40,7 +40,7 @@ export function validateSchedule(slots: ScheduleSlot[]): string | null {
   if (slots.some(slot => !slot || typeof slot.id !== 'string' || !slot.id || typeof slot.label !== 'string' || !slot.label.trim() || slot.label.length > 30)) return 'Give each check-in a name of 1–30 characters.'
   if (slots.some(slot => typeof slot.time !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(slot.time))) return 'Choose a valid time for every check-in.'
   if (new Set(slots.map(slot => slot.time)).size !== slots.length) return 'Choose a different time for each check-in.'
-  if (new Set(slots.map(slot => slot.id)).size !== slots.length) return 'Each check-in needs its own identifier.'
+  if (new Set(slots.map(slot => slot.id)).size !== slots.length) return 'We couldn’t save these times. Close the panel and try again.'
   return null
 }
 
@@ -85,5 +85,5 @@ export function readJournal(storage: Pick<Storage, 'getItem'>): Journal {
 
 export function writeJournal(storage: Pick<Storage, 'setItem'>, journal: Journal): void {
   try { storage.setItem(STORAGE_KEY, JSON.stringify(journal)) }
-  catch { throw new Error('We couldn’t save on this browser. Free up some storage or allow site storage, then try again.') }
+  catch { throw new Error('We couldn’t save here. Allow this site to save data or free up space, then try again.') }
 }

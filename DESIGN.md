@@ -234,7 +234,7 @@ A separate Operate surface presents one to three short, optional activities as d
 
 ## Username session entry
 
-The cloud welcome defaults to Username and Start my journal, with the remembered-browser and recovery limits explained before entry. Existing email login remains an alternate text action. The journal shows a Session label rather than a blank email address. Optional recovery and local import controls sit in Journal options so Save remains visible at 375×667. Recovery uses a native disclosure and the existing pale fields, coral text actions and visible focus treatment. Anonymous sign-out asks for confirmation because clearing that session can remove access.
+The cloud welcome defaults to Username and Start my journal, with short instructions and a separate action for an existing journal. Access-loss guidance appears at sign-out; recovery requirements appear in Journal options. Existing email login remains an alternate text action. The journal shows its name rather than a session label or a blank email address. Optional recovery and local import controls sit in Journal options so Save remains visible at 375×667. Recovery uses a native disclosure and the existing pale fields, coral text actions and visible focus treatment. Anonymous sign-out asks for confirmation because clearing that session can remove access.
 
 ## Viewport workspace, panels and installation
 
@@ -253,3 +253,7 @@ The Operate welcome surface separates **Connect existing journal** from creating
 ## Release updates
 
 An available release opens the existing native Panel with a plain heading, a warning to save unfinished work and **Update now / Later**. Postponing preserves the current form and leaves a compact outlined **Update available** control. On phone the reminder sits above bottom navigation and its safe area; on PC it sits in the lower-right corner. The panel reuses the current type, focus treatment and reduced-motion behavior. No extra decoration or image assets.
+
+## Interface language
+
+Keep everyday screens brief and familiar. Say **Your journal**, **Saving…** and **Add demo entries** rather than naming cloud storage, sessions or imports. The welcome form has no technical disclaimer. Put essential consequences beside their action: losing access at sign-out, saving unfinished work before updating, keeping connection codes private and the demo staying in this browser. Recovery and install help give only the next steps and relevant limits; provider and infrastructure details belong in setup documentation.

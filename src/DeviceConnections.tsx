@@ -35,8 +35,8 @@ export default function DeviceConnections({ client, journal, supported, original
 
   return <details aria-busy={busy} className="device-connections" onToggle={event => setOpen(event.currentTarget.open)}>
     <summary>Connect another device</summary>
-    {!supported ? <p>Device connection is being enabled. Keep this phone signed in; your existing journal is safe.</p> : !original ? <p>This device is connected to your original journal. To connect another device or remove one, open Journal options on the original phone.</p> : <>
-      <p>Open the app on your PC and choose <strong>Connect existing journal</strong>. Generate a code here, then enter it on the PC. It grants access to this journal; keep it private.</p>
+    {!supported ? <p>Connecting devices isn’t available yet. Keep your journal open here and try again later.</p> : !original ? <p>Manage connected devices from Journal options on your original phone.</p> : <>
+      <p>Open the app on your PC and choose <strong>Connect existing journal</strong>. Enter a code from here on the PC. Keep it private—it opens your journal.</p>
       <button type="button" className="text-button" disabled={busy} onClick={async () => {
         if (pending.current) return
         pending.current = true; setBusy(true); setError(''); setCopied(false)
@@ -59,8 +59,8 @@ export default function DeviceConnections({ client, journal, supported, original
           await load()
         } catch (caught) { if (alive.current) setError((caught as Error).message) }
         finally { pending.current = false; if (alive.current) setBusy(false) }
-      }}>Remove</button></li>)}</ul> : <p>No other devices connected yet. After connecting a PC, choose Refresh devices.</p>}
-      <p>Removing a device ends its journal access. Your phone’s history stays in place.</p>
+      }}>Remove</button></li>)}</ul> : <p>No other devices connected yet.</p>}
+      <p>Remove a device to stop it opening your journal. Your history stays saved.</p>
     </>}
     {error && <p className="error-message" role="alert">{error}</p>}
   </details>

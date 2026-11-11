@@ -48,8 +48,8 @@ export default function AppUpdate({ currentVersion, onUpdate }: { currentVersion
   if (!open) return <button type="button" className="app-update-offer" aria-haspopup="dialog" aria-label="Update available" onClick={() => setOpen(true)}><RefreshCw size={16} />Update available</button>
   return <Panel title="An update is ready" onClose={later}>
     <div className="app-update-content">
-      <p>A fresh version of Little moments is ready on this device.</p>
-      <p>Save any unfinished check-in or changes before updating. Updating reloads the app; your saved moments and remembered sign-in stay here.</p>
+      <p>A new version of Little moments is ready.</p>
+      <p>Save your unfinished check-in or changes first. Your saved moments and sign-in will stay.</p>
       {error && <p role="alert" className="error-message">{error}</p>}
       <div className="app-update-actions"><button type="button" className="primary-button" onClick={() => {
         // Existing forms expose pending writes/sign-ins through their accessibility state.
