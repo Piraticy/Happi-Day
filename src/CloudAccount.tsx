@@ -42,6 +42,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
   const owner = useRef<string | null>(null)
   const epoch = useRef(0)
   const writing = useRef(false)
+  const reading = useRef<number | null>(null)
   const user = session?.user
   const repository = useMemo(() => client && user ? cloudRepository(client, user) : null, [client, user?.id, user?.email])
 
@@ -73,25 +74,38 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
     return () => window.clearTimeout(timer)
   }, [cooldown])
 
-  const refresh = useCallback(async () => {
-    if (!repository || !user || writing.current) return
+  const refresh = useCallback(async (quiet = false) => {
+    if (!repository || !user || writing.current || reading.current === epoch.current) return
     const request = ++epoch.current
+    reading.current = request
     const id = user.id
-    setCloud(current => ({ owner: id, journalOwner: current.owner === id ? current.journalOwner : null, connections: current.owner === id && current.connections, journal: current.owner === id ? current.journal : null, error: '', loading: true }))
+    if (!quiet) setCloud(current => ({ owner: id, journalOwner: current.owner === id ? current.journalOwner : null, connections: current.owner === id && current.connections, journal: current.owner === id ? current.journal : null, error: '', loading: true }))
     try {
       const loaded = await repository.load()
       if (owner.current === id && epoch.current === request) setCloud({ owner: id, journal: loaded.journal, journalOwner: loaded.ownerId, connections: loaded.connections, error: '', loading: false })
     } catch (error) {
       if (owner.current === id && epoch.current === request) setCloud(current => ({ ...current, loading: false, error: (error as Error).message }))
-    }
+    } finally { if (reading.current === request) reading.current = null }
   }, [repository, user?.id])
 
   useEffect(() => {
     if (!user) return
     void refresh()
-    const onFocus = () => { void refresh() }
-    window.addEventListener('focus', onFocus)
-    return () => { epoch.current++; window.removeEventListener('focus', onFocus) }
+    const sync = () => {
+      if (document.visibilityState === 'visible' && navigator.onLine) void refresh(true)
+    }
+    // shortcut: poll existing access-checked reads; use realtime if journal size or traffic grows.
+    const timer = window.setInterval(sync, 15_000)
+    window.addEventListener('focus', sync)
+    window.addEventListener('online', sync)
+    document.addEventListener('visibilitychange', sync)
+    return () => {
+      epoch.current++
+      window.clearInterval(timer)
+      window.removeEventListener('focus', sync)
+      window.removeEventListener('online', sync)
+      document.removeEventListener('visibilitychange', sync)
+    }
   }, [refresh, user?.id])
 
   async function signOut() {

@@ -36,11 +36,18 @@ a { color: var(--coral); text-underline-offset: 4px; }
 svg { flex-shrink: 0; }
 h1, h2, h3, p { margin-top: 0; }
 h1, h2 { text-wrap: balance; }
+/* Little moments display: compact, expressive lettering; body text stays open and clear. */
+h1, .welcome-form h2, .sheet-header h2, .sidebar-message > p {
+  font-variation-settings: 'wdth' 90, 'opsz' 80;
+}
+.brand { font-variation-settings: 'wdth' 88, 'opsz' 96; }
+.mood-option > span:not(.mood-tick) { font-family: var(--heading); font-weight: 600; }
+input, textarea { font-variant-ligatures: none; }
 h1 { font-family: var(--heading); font-size: clamp(2.5rem, 4vw, 3.5rem); line-height: 1.03; letter-spacing: -.035em; font-weight: 600; margin-bottom: 18px; }
 p { line-height: 1.65; }
 fieldset { padding: 0; border: 0; margin: 0; min-width: 0; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--heading); font-size: 26px; font-weight: 700; letter-spacing: -.04em; white-space: nowrap; }
+.brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--heading); font-size: 26px; font-weight: 800; letter-spacing: -.025em; white-space: nowrap; }
 .brand > svg { width: 31px; height: 31px; }
 .brand-dot { color: #ee9a80; margin-left: -10px; }
 .primary-button { border: 1px solid transparent; border-radius: 13px; padding: 17px 22px; min-height: 54px; background: var(--coral); color: #fff8ef; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 24px; }

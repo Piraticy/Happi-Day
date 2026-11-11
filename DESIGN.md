@@ -149,7 +149,7 @@ The palette combines warm surfaces with a dark plum structure and five distinct 
 
 **Body Font:** DM Sans Variable, with sans-serif fallback. Both are imported locally through Fontsource in the app entry point.
 
-Bricolage's rounded forms give large questions and the wordmark their character. DM Sans carries compact controls and supporting information. Large headings use tight tracking; labels remain sentence case.
+The Little moments display treatment uses Bricolage’s full variable font: width 90 and optical size 80 for large questions and panel titles; width 88, optical size 96 and weight 800 for the wordmark. These are custom typography settings, not a newly drawn font family. Mood labels also use Bricolage at weight 600. The existing font license is unchanged. DM Sans carries compact controls and supporting information. Large headings use tight tracking; labels remain sentence case.
 
 - **Display:** page headings use the frontmatter display role, using compact phone heading sizes (26–32px on Today and28px on secondary pages). The welcome story uses a larger responsive heading (`clamp(44px, 5vw, 76px)`), with a mobile size (38px).
 - **Headline:** the welcome form heading uses the headline role, reducing on mobile (31px).

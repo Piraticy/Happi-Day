@@ -6,6 +6,7 @@ A mood journal for small daily check-ins, private cloud history, and gentle well
 
 ## Features
 
+- A distinctive Little moments typography treatment: expressive variable-font headings and wordmark, with clear journal text. Fonts are bundled with the app.
 - Five labeled moods: Low, Down, Okay, Good, and Great.
 - Optional suggested reasons and a custom note of up to 500 characters.
 - Three daily check-in times by default: 09:00, 14:00, and 20:00. Edit these, add more times, or record an extra moment whenever you want.
@@ -30,7 +31,18 @@ To access your open phone journal on a PC without email, follow [Connect your de
 
 Optional email recovery remains available: open **Journal options → Keep this journal accessible**, add an email, and confirm its link before leaving the original session. Then use **Use an email link instead** on the other device. Sending a recovery link does not mean the email has been verified.
 
-History refreshes when the window regains focus or you choose **Refresh history**. There is no offline write queue or realtime subscription. Failed saves preserve the current check-in draft for retry.
+Connected devices check for saved history and schedule changes every **15 seconds** while the app is visible and online, and when you return to the app or reconnect. **Refresh history** is also available. Checks pause during saves and do not reset unfinished check-ins. This is periodic sync, not instant realtime or offline sync; changes must save successfully before another device can retrieve them. If two devices edit the schedule, the last successful save wins.
+
+### Recovery quick guide
+
+- **Still signed in on the original device:** keep it open. Choose **Journal options → Connect another device → Generate connection code**. On the other device choose **Connect existing journal**.
+- **Confirmed a recovery email:** use **Use an email link instead** with that address. Adding an address without confirming it does not enable recovery.
+- **Signed out everywhere, with no confirmed email:** a username alone cannot restore access. The Supabase project administrator must identify the original journal by its full user ID and saved entries, then issue a one-use connection code for that exact journal. Do not select a journal by name alone, delete tables, or disable access rules.
+- **Recovered using an administrator-issued code:** you can read and save the original history. This is a connected device, not the original session; generating codes and removing devices from the dashboard still requires the original session. If it is lost, the administrator must issue a fresh code for each additional device.
+
+**SQL belongs in Supabase → SQL Editor. Only the resulting `connection_code` belongs in the app.** Copy the entire result cell: the ungrouped code has **20 letters/numbers**, even if the results column displays only part of it. Codes work once, expire after **10 minutes**, and are replaced when a new code is generated. If expired, generate a new code; do not rerun the table-creation migration. Never share codes or session tokens in GitHub issues, screenshots, or chat.
+
+After connecting, check **History** for the expected entries and keep at least one device signed in. Confirm an optional recovery email before signing out. The [device guide](docs/connect-devices.md) explains setup and access limits.
 
 ## Install on a PC
 
@@ -110,9 +122,9 @@ npm run build  # TypeScript checks and Vite production build
 npm run preview
 ```
 
-Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails. Update tests cover multiple open clients, matching/new versions, postpone/reopen, unchanged storage/drafts, busy operations even after their panel closes, focus/visibility/reconnection, failed checks, timeout and unmount cleanup. Device tests cover independent phone/PC sessions, shared reads and writes, lost-response recovery, owner changes, one-use/expired codes, rate limits, existing-data protection, private membership tables and revocation. The device migration and physical phone-to-PC pairing have not yet been verified against the live backend.
+Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails. Update tests cover multiple open clients, matching/new versions, postpone/reopen, unchanged storage/drafts, busy operations even after their panel closes, focus/visibility/reconnection, failed checks, timeout and unmount cleanup. Device tests cover independent phone/PC sessions, shared reads and writes, lost-response recovery, owner changes, one-use/expired codes, rate limits, existing-data protection, private membership tables and revocation. Recovery into a connected device has been observed in the live app. Automatic sync is covered by SDK integration tests, including incoming additions/deletions, draft preservation, hidden/offline pauses, reconnection and request cleanup. This release still needs a physical phone-to-PC sync check.
 
-Real username entry, a cloud mood save, and history retrieval after a full browser reload have been verified against the live backend. Recovery-email delivery and cross-device email confirmation have not been live-tested; physical mobile devices have not been tested. Installation lifecycle tests cover the prompt, cancellation, storage failures, persisted/standalone/related-app detection, reinstall offers and stale-query races. Panel tests cover nested Escape dismissal, focus, drafts, visible save failures and Undo; gesture tests cover horizontal, vertical, cancelled and form gestures. Chrome’s manifest inspector recognizes the app metadata and icons, but actual Windows installation has not been tested; the available Chrome Guest window blocks native installation.
+Real username entry, a cloud mood save, and history retrieval after a full browser reload have been verified against the live backend. Recovery-email delivery and cross-device email confirmation have not been live-tested; this release has not been tested on a physical phone. Installation lifecycle tests cover the prompt, cancellation, storage failures, persisted/standalone/related-app detection, reinstall offers and stale-query races. Panel tests cover nested Escape dismissal, focus, drafts, visible save failures and Undo; gesture tests cover horizontal, vertical, cancelled and form gestures. Chrome’s manifest inspector recognizes the app metadata and icons, but actual Windows installation has not been tested; the available Chrome Guest window blocks native installation.
 
 ## Deployment
 

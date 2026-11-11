@@ -8,7 +8,7 @@ import { freshJournal, STORAGE_KEY } from './model'
 
 const clients: SupabaseClient[] = []
 beforeEach(() => localStorage.clear())
-afterEach(() => { clients.splice(0).forEach(client => client.auth.stopAutoRefresh()); vi.restoreAllMocks() })
+afterEach(() => { clients.splice(0).forEach(client => client.auth.stopAutoRefresh()); vi.restoreAllMocks(); vi.useRealTimers() })
 
 function backend() {
   const entries = new Map<string, Record<string, unknown>[]>()
@@ -100,6 +100,55 @@ function backend() {
 }
 
 describe('real SDK integration at the network boundary', () => {
+  it('automatically retrieves other-device changes without losing an unfinished check-in', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    const server = backend()
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    await server.login('alex')
+    fireEvent.click(await screen.findByRole('radio', { name: 'Good' }))
+    fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
+    fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Still writing here' } })
+    server.entries.set('alex', [{ id: 'from-phone', mood: 'okay', reasons: [], note: 'Saved on my phone', occurred_at: new Date().toISOString(), slot_id: null, deleted_at: null }])
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000) })
+    expect(screen.getByLabelText('Your own reason')).toHaveValue('Still writing here')
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
+    expect(screen.getByRole('radio', { name: 'Good' })).toBeChecked()
+    fireEvent.click(screen.getByRole('button', { name: /Today’s moments/ }))
+    expect(screen.getByText('Saved on my phone')).toBeVisible()
+    server.entries.set('alex', [])
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000) })
+    expect(screen.queryByText('Saved on my phone')).not.toBeInTheDocument()
+  })
+
+  it('pauses automatic reads while hidden or offline, resumes online, and avoids overlapping reads', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    const server = backend()
+    const app = render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    await server.login('alex')
+    await screen.findByRole('radio', { name: 'Good' })
+    const reads = () => server.requests.filter(request => request.path.endsWith('/happi_entries')).length
+    const initialReads = reads()
+    const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden')
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000) })
+    expect(reads()).toBe(initialReads)
+    visibility.mockReturnValue('visible')
+    const online = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    fireEvent(document, new Event('visibilitychange'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000) })
+    expect(reads()).toBe(initialReads)
+    const release = server.holdReads('alex')
+    online.mockReturnValue(true)
+    await act(async () => { fireEvent(window, new Event('online')) })
+    await waitFor(() => expect(reads()).toBe(initialReads + 1))
+    fireEvent(window, new Event('focus'))
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_000) })
+    expect(reads()).toBe(initialReads + 1)
+    await act(async () => { release() })
+    app.unmount()
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_000) })
+    expect(reads()).toBe(initialReads + 1)
+  })
+
   it('creates a private username session, saves a mood and reopens without another signup', async () => {
     const server = backend()
     const app = render(<CloudAccount client={server.client} onDemo={() => {}} />)
