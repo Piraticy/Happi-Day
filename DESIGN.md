@@ -237,3 +237,9 @@ A separate Operate surface presents one to three short, optional activities as d
 ## Username session entry
 
 The cloud welcome defaults to Username and Start my journal, with the remembered-browser and recovery limits explained before entry. Existing email login remains an alternate text action. The journal shows a Session label rather than a blank email address. Optional recovery and local import controls sit after the primary page content so Save remains visible on375×667. Recovery uses a native disclosure and the existing pale fields, coral text actions and visible focus treatment. Anonymous sign-out asks for confirmation because clearing that session can remove access.
+
+## Desktop workspace and installation
+
+Above 1000px, the workspace uses fluid horizontal padding and up to 1500px of content, with a flexible check-in column and a 280–360px daily panel. The desktop header is 88px tall, and spacing keeps the main save action visible on a short laptop window with reasons collapsed. Today’s moments opens on desktop and collapses when crossing to a phone/tablet width; people can still toggle it. History lays out entries in two columns per day. Above 1200px, Your rhythm and Little lifts put their introduction beside the working content. Prose retains a readable measure; phone navigation and check-in order stay intact.
+
+An outlined Install app control sits in the upper-right header area, becoming a labeled icon on phone. It captures a native browser installation offer when available, gives inline manual instructions otherwise, and disappears in a standalone app window. The help panel uses the existing ground, borders, text and focus treatments. It states online requirements and Safari’s separate-session behavior. The manifest’s 192/512px PNG icons reuse the authored smiling emblem on a fully opaque peach background, with the mark inside the maskable safe area.

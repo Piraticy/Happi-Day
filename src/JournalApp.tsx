@@ -41,6 +41,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
   const [deleted, setDeleted] = useState<Entry | null>(null)
   const [now, setNow] = useState(() => new Date())
   const mainRef = useRef<HTMLElement>(null)
+  const momentsRef = useRef<HTMLDetailsElement>(null)
   const journal = cloud?.journal ?? loaded.journal ?? freshJournal()
   const todayEntries = journal.entries.filter(entry => localDay(new Date(entry.timestamp)) === localDay(now))
 
@@ -52,6 +53,15 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
     window.addEventListener('focus', update)
     return () => { window.clearInterval(timer); window.removeEventListener('focus', update) }
   }, [])
+
+  useEffect(() => {
+    const desktop = window.matchMedia?.('(min-width: 1001px)')
+    if (!desktop) return
+    const update = () => { if (momentsRef.current) momentsRef.current.open = desktop.matches }
+    update()
+    desktop.addEventListener('change', update)
+    return () => desktop.removeEventListener('change', update)
+  }, [view, active])
 
   useEffect(() => {
     if (cloud) return
@@ -143,7 +153,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
           <div className="page-intro checkin-intro"><h1>How are you<br />feeling today?</h1><p>A little check-in. A little more in tune.</p></div>
           <aside className="daily-panel">
             <DailyRhythm slots={journal.schedule} entries={todayEntries} onEdit={() => navigate('rhythm')} />
-            <details className="today-moments"><summary><span>Today’s moments</span><span className="moment-count">{todayEntries.length}</span></summary>
+            <details className="today-moments" ref={momentsRef}><summary><span>Today’s moments</span><span className="moment-count">{todayEntries.length}</span></summary>
               {todayEntries.length ? <EntryList entries={todayEntries} onDelete={removeEntry} compact /> : <div className="today-empty"><span className="empty-mark" aria-hidden="true"><Heart size={24} strokeWidth={1.3} /></span><p>A fresh page for today.</p><span>Your first check-in will live here.</span></div>}
             </details>
           </aside>

@@ -1,6 +1,6 @@
 # Happi-Day · Little moments
 
-A mobile-friendly mood journal for small daily check-ins, private cloud history, and gentle wellbeing activities.
+A mood journal for small daily check-ins, private cloud history, and gentle wellbeing activities on phone and desktop.
 
 **[Open the live app](https://happi-day-little-moments.vercel.app/)**
 
@@ -11,6 +11,8 @@ A mobile-friendly mood journal for small daily check-ins, private cloud history,
 - Three daily check-in times by default: 09:00, 14:00, and 20:00. Edit these, add more times, or record an extra moment whenever you want.
 - Saved history with mood filtering, confirmed deletion, and undo.
 - A compact phone interface with optional reasons and saved moments collapsed.
+- A wider desktop workspace with a persistent navigation rail, side-by-side check-in and daily rhythm, open saved moments, and roomier history.
+- An installable web app with its own window and app icon; no separate download is needed.
 - **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. Activities are always optional; the library eventually repeats.
 - Username sessions backed by Supabase, with private cloud saves and remembered browser sessions.
 - Optional verified email recovery and explicit import of browser-local demo entries.
@@ -24,6 +26,16 @@ With Supabase configured, enter a username and choose **Start my journal**. No p
 To access the same journal on another device, open **Keep this journal accessible**, add a recovery email, and confirm its link before leaving the original session. Then use **Use an email link instead** on the other device. Sending a recovery link does not mean the email has been verified.
 
 History refreshes when the window regains focus or you choose **Refresh history**. There is no offline write queue or realtime subscription. Failed saves preserve the current check-in draft for retry.
+
+## Install on a PC
+
+Open the [live app](https://happi-day-little-moments.vercel.app/) in a regular **Chrome or Edge** window, then choose **Install app** in the upper-right corner. If the native prompt is not available, the button shows instructions: use the browser’s address-bar install icon or menu install option. The app opens in its own window and uses the same online backend. Installation support and prompts depend on the browser; Guest/private windows may not allow installation. See [MDN’s installation guide](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable).
+
+On supported Macs, Safari also offers **File → Add to Dock**. Safari’s installed app has separate local storage: **confirm a recovery email before installing if you want to reopen an existing journal**, then use email login in the installed app. A username cannot recover it. See [WebKit’s storage explanation](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/).
+
+Cloud saves and history require an internet connection. There is no service worker, offline cache or offline sync queue; this avoids caching private API responses or serving stale app versions. This is a browser-installed app, not a Windows `.exe` package. Updates arrive from the live site when the app reloads online.
+
+The 192px and 512px app icons in `public/icons/` are rasterizations of the project’s authored `public/favicon.svg`, rendered at 1024px with macOS `sips`, then downsampled. Their background fills the square for maskable icon support. They contain no third-party or generated imagery.
 
 ## Run locally
 
@@ -77,7 +89,7 @@ npm run preview
 
 Tests use the real Supabase SDK against a controlled HTTP boundary and PGlite's PostgreSQL engine for database validation and ownership policies. They do not send live authentication emails.
 
-Real username entry, a cloud mood save, and history retrieval after a full browser reload have been verified against the live backend. Recovery-email delivery and cross-device email confirmation have not been live-tested; physical mobile devices have not been tested.
+Real username entry, a cloud mood save, and history retrieval after a full browser reload have been verified against the live backend. Recovery-email delivery and cross-device email confirmation have not been live-tested; physical mobile devices have not been tested. Installation lifecycle tests cover the prompt, cancellation, errors and already-installed state. Chrome’s manifest inspector recognizes the app metadata and icons, but actual Windows installation has not been tested; the available Chrome Guest window blocks native installation.
 
 ## Deployment
 
@@ -91,6 +103,7 @@ The existing Vercel project `happi-day-little-moments` is connected to `Piraticy
 | --- | --- |
 | `src/CloudAccount.tsx`, `src/SessionRecovery.tsx` | Username sessions, optional email login/recovery, and account lifecycle |
 | `src/cloud.ts` | Supabase configuration, granular cloud changes, and journal persistence |
+| `src/InstallApp.tsx`, `public/manifest.webmanifest` | Browser installation prompt, fallback instructions, and standalone app metadata |
 | `src/JournalApp.tsx` | Shared journal interface and local demo |
 | `src/CheckIn.tsx`, `src/History.tsx`, `src/Schedule.tsx` | Mood entry, history, and daily times |
 | `src/LittleLifts.tsx`, `src/lifts.ts` | Daily wellbeing activities and rotation |

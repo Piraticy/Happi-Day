@@ -486,3 +486,66 @@ summary:focus-visible { outline: 3px solid var(--coral); outline-offset: 4px; bo
   .session-recovery button { margin-left: 0; }
   .welcome-form > .demo-switch { display: flex; margin-top: 4px; }
 }
+
+/* Installation is available before sign-in and across journal pages. */
+.install-control { position: absolute; z-index: 6; top: 32px; right: clamp(24px, 4vw, 72px); }
+.install-button { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--ground); color: var(--ink); font-size: 13px; font-weight: 600; }
+.install-button:hover:not(:disabled) { background: var(--surface); }
+.install-help { position: absolute; top: calc(100% + 12px); right: 0; width: min(380px, calc(100vw - 40px)); padding: 20px 22px; border: 1px solid var(--line); border-radius: 16px; background: var(--ground); }
+.install-help .section-heading { gap: 8px; align-items: flex-start; }
+.install-help h2 { font-family: var(--heading); font-size: 24px; font-weight: 500; line-height: 1.15; letter-spacing: -.025em; padding-top: 5px; }
+.install-help .icon-button { margin: -9px -12px 0 0; }
+.install-help p { color: var(--muted); font-size: 13px; margin: 14px 0 0; }
+.install-help [role='status'] { color: var(--ink); }
+@media (min-width: 761px) {
+  .topbar { padding-right: 160px; }
+}
+
+/* A desktop workspace uses the window, while prose keeps a readable measure. */
+@media (min-width: 1001px) {
+  .workspace { max-width: none; padding-inline: clamp(32px, 3.4vw, 72px); }
+  .workspace > .topbar, .workspace > main, .workspace > .workspace-footer { max-width: 1500px; margin-inline: auto; }
+  .topbar { height: 88px; }
+  .install-control { top: 22px; }
+  main { padding-top: 28px; }
+  .cloud-toolbar { margin-top: -10px; margin-bottom: 18px; }
+  .checkin-intro h1 { font-size: clamp(42px, 3.4vw, 56px); }
+  .today-layout { grid-template-columns: minmax(0, 1fr) clamp(280px, 24vw, 360px); column-gap: clamp(32px, 3.4vw, 64px); }
+  .checkin-intro { margin-bottom: 24px; }
+  .checkin-form, .lift-invitation { max-width: none; }
+  .daily-panel { padding: 24px; }
+  .mood-options { gap: clamp(8px, 1vw, 20px); }
+  .mood-option { padding: 8px 6px 12px; }
+  .mood-option .mood-face { width: clamp(62px, 5.3vw, 96px); }
+  .mood-option > span:not(.mood-tick) { font-size: 14px; }
+  .moment-select label, .moment-select select { font-size: 13px; }
+  .mood-caption, .save-footnote { font-size: 12px; }
+  .mood-caption { margin-block: 12px 18px; }
+  .save-checkin { max-width: 360px; margin-top: 16px; }
+  .save-footnote { max-width: 360px; }
+  .history-page, .schedule-page, .lifts-page { max-width: none; }
+  .history-page .entry-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; align-items: start; }
+  .entry-note { max-width: 70ch; }
+  .local-import, .session-recovery { max-width: 800px; }
+}
+@media (min-width: 1201px) {
+  .schedule-page, .lifts-page { display: grid; grid-template-columns: minmax(260px, .8fr) minmax(0, 1.2fr); column-gap: clamp(40px, 5vw, 80px); align-items: start; }
+  .schedule-page > .page-intro, .lifts-page > .page-intro { grid-column: 1; grid-row: 1 / span 6; }
+  .schedule-form { max-width: none; margin-top: 0; grid-column: 2; }
+  .lifts-daily, .lift-list, .lift-alternatives, .lifts-note, .lifts-about { grid-column: 2; }
+  .lifts-daily { margin-top: 0; min-height: 44px; }
+  .lift-alternatives { justify-self: start; }
+}
+@media (max-width: 760px) {
+  .install-control { top: 10px; right: 68px; }
+  .install-button { width: 44px; padding: 10px; justify-content: center; border-color: transparent; }
+  .install-button > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .install-help { right: -48px; top: calc(100% + 8px); }
+}
+
+@media (min-width: 761px) and (max-height: 800px) {
+  .sidebar { padding-top: 28px; }
+  .sidebar > .brand { margin-bottom: 32px; }
+  .sidebar-message { padding: 24px 10px; }
+  .sidebar-message > p { font-size: 22px; }
+}

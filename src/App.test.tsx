@@ -18,6 +18,19 @@ function enterDemo() {
 }
 
 describe('Happi-Day local demo', () => {
+  it('opens today’s saved moments on desktop and collapses them on phone', () => {
+    const media = new EventTarget() as MediaQueryList
+    Object.assign(media, { matches: true })
+    vi.stubGlobal('matchMedia', () => media)
+    try {
+      enterDemo()
+      const details = screen.getByText('Today’s moments').closest('details')!
+      expect(details.open).toBe(true)
+      act(() => { Object.assign(media, { matches: false }); media.dispatchEvent(new Event('change')) })
+      expect(details.open).toBe(false)
+    } finally { vi.unstubAllGlobals() }
+  })
+
   it('keeps optional reasons collapsed until requested', () => {
     enterDemo()
     expect(screen.queryByLabelText('Your own reason')).not.toBeInTheDocument()
