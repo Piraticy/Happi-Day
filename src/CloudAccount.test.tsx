@@ -19,6 +19,7 @@ function backend() {
   let failRecovery = false
   let sequence = 0
   let deviceSetup = true
+  let memberInvites = true
   let dropRedeemResponse = false
   const memberships = new Map<string, string | null>()
   const codes = new Map<string, string>()
@@ -40,10 +41,11 @@ function backend() {
       const effective = memberships.has(owner) ? memberships.get(owner) : owner
       if (url.pathname.endsWith('/rpc/happi_journal_owner')) return deviceSetup ? Response.json(effective) : Response.json({ code: 'PGRST202', message: 'Missing migration' }, { status: 404 })
       if (url.pathname.endsWith('/rpc/happi_create_device_code')) {
-        if (memberships.has(owner)) return Response.json({ message: 'Original device only' }, { status: 400 })
+        if (!memberInvites && memberships.has(owner)) return Response.json({ message: 'Create the connection code on the original device.' }, { status: 400 })
+        if (!effective) return Response.json({ message: 'This device was disconnected.' }, { status: 400 })
         const code = 'ABCD1234ABCD1234ABCD'
-        codes.set(code, owner)
-        if (!profiles.has(owner)) profiles.set(owner, { display_name: body.p_display_name, schedule: body.p_schedule })
+        codes.set(code, effective)
+        if (!profiles.has(effective)) profiles.set(effective, { display_name: body.p_display_name, schedule: body.p_schedule })
         return Response.json({ code, expires_at: new Date(Date.now() + 600_000).toISOString() })
       }
       if (url.pathname.endsWith('/rpc/happi_redeem_device_code')) {
@@ -57,7 +59,7 @@ function backend() {
       if (url.pathname.endsWith('/rpc/happi_revoke_device')) {
         const id = String(body.p_device_id)
         if (memberships.get(id) !== owner) return Response.json(false)
-        memberships.set(id, null); return Response.json(true)
+        memberships.set(id, null); for (const [code, journal] of codes) if (journal === owner) codes.delete(code); return Response.json(true)
       }
       if (url.pathname.endsWith('/signup')) {
         if (failSignup) return Response.json({ message: 'Signup unavailable' }, { status: 400 })
@@ -96,7 +98,7 @@ function backend() {
     await act(async () => { const result = await client.auth.setSession({ access_token: token, refresh_token: `refresh-${id}` }); expect(result.error).toBeNull() })
   }
   function holdReads(id: string) { let release!: () => void; gates.set(id, new Promise<void>(resolve => { release = resolve })); return release }
-  return { client, entries, requests, login, holdReads, makeClient, memberships, codes, profiles, dropRedeemResponse: () => { dropRedeemResponse = true }, deviceSetup: (enabled: boolean) => { deviceSetup = enabled }, failReads: () => { failReads = true }, failWrites: (fail: boolean) => { failWrites = fail }, failSignup: (fail: boolean) => { failSignup = fail }, failRecovery: (fail: boolean) => { failRecovery = fail } }
+  return { client, entries, requests, login, holdReads, makeClient, memberships, codes, profiles, deviceLabels, memberInvites: (enabled: boolean) => { memberInvites = enabled }, dropRedeemResponse: () => { dropRedeemResponse = true }, deviceSetup: (enabled: boolean) => { deviceSetup = enabled }, failReads: () => { failReads = true }, failWrites: (fail: boolean) => { failWrites = fail }, failSignup: (fail: boolean) => { failSignup = fail }, failRecovery: (fail: boolean) => { failRecovery = fail } }
 }
 
 describe('real SDK integration at the network boundary', () => {
@@ -424,6 +426,60 @@ describe('phone-to-PC connection', () => {
     expect(server.entries.has(pcUser)).toBe(false)
     expect(server.requests.some(request => request.path.endsWith('/otp'))).toBe(false)
     screens.unmount()
+  })
+
+  it('clears the displayed invitation when removing a device invalidates it', async () => {
+    const server = backend()
+    server.memberships.set('linked', phoneId)
+    server.deviceLabels.set('linked', 'My tablet')
+    await server.login(phoneId)
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Journal options' }))
+    fireEvent.click(screen.getByText('Connect another device'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate connection code' }))
+    await screen.findByLabelText('One-use connection code')
+    fireEvent.click(await screen.findByRole('button', { name: 'Refresh devices' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove My tablet' }))
+    await waitFor(() => expect(screen.queryByLabelText('One-use connection code')).not.toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: 'Copy code' })).not.toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Generate connection code' })).toBeEnabled()
+  })
+
+  it('explains the one-time setup when a recovered device still uses the old database function', async () => {
+    const server = backend()
+    server.memberInvites(false)
+    server.memberships.set('recovered', phoneId)
+    await server.login('recovered')
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Journal options' }))
+    fireEvent.click(screen.getByText('Connect another device'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate connection code' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/one-time setup update/)
+    expect(screen.queryByLabelText('One-use connection code')).not.toBeInTheDocument()
+  })
+
+  it('generates an invitation from a recovered dashboard and opens the same journal on a third device', async () => {
+    const server = backend()
+    server.memberships.set('recovered', phoneId)
+    server.profiles.set(phoneId, { display_name: 'Recovered journal', schedule: freshJournal().schedule })
+    server.entries.set(phoneId, [{ id: 'original-entry', mood: 'good', reasons: [], note: 'Original history', occurred_at: new Date().toISOString(), slot_id: null, deleted_at: null }])
+    await server.login('recovered')
+    const recovered = render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Journal options' }))
+    fireEvent.click(screen.getByText('Connect another device'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Generate connection code' }))
+    const code = (await screen.findByLabelText('One-use connection code') as HTMLInputElement).value
+    expect(screen.queryByRole('button', { name: 'Refresh devices' })).not.toBeInTheDocument()
+    recovered.unmount()
+    const nextClient = server.makeClient()
+    render(<CloudAccount client={nextClient} createDeviceClient={() => server.makeClient(false)} onDemo={() => {}} />)
+    fireEvent.click(await screen.findByRole('button', { name: /Connect existing journal/ }))
+    fireEvent.change(screen.getByLabelText('Connection code'), { target: { value: code } })
+    fireEvent.click(screen.getByRole('button', { name: 'Connect my journal' }))
+    await screen.findByRole('radio', { name: 'Good' })
+    fireEvent.click(screen.getByRole('button', { name: 'History' }))
+    expect(screen.getByText('Original history')).toBeVisible()
+    expect(server.memberships.get((await nextClient.auth.getSession()).data.session!.user.id)).toBe(phoneId)
   })
 
   it('recovers when redemption commits but the response is lost', async () => {

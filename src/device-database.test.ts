@@ -4,7 +4,7 @@ import { PGlite } from '@electric-sql/pglite'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
 const ids = Array.from({ length: 8 }, (_, index) => `${index + 1}`.repeat(8) + '-1111-4111-8111-' + `${index + 1}`.repeat(12))
-const [phone, pc, stranger, expiredDevice, limited, occupied, otherPc] = ids
+const [phone, pc, stranger, expiredDevice, limited, occupied, otherPc, invited] = ids
 const schedule = [{ id: 'morning', label: 'Morning', time: '09:00' }, { id: 'afternoon', label: 'Afternoon', time: '14:00' }, { id: 'evening', label: 'Evening', time: '20:00' }]
 let db: PGlite
 let consumedCode: string
@@ -32,6 +32,8 @@ beforeAll(async () => {
   for (const name of ['202611100001_cloud_journal.sql','202611120001_device_connections.sql']) await db.exec(await readFile(new URL(`../supabase/migrations/${name}`, import.meta.url), 'utf8'))
   await asUser(phone)
   await db.query("insert into public.happi_entries(user_id,id,mood,note,occurred_at) values($1,'phone-entry','good','Already on phone',now())", [phone])
+  await db.exec('reset role')
+  await db.exec(await readFile(new URL('../supabase/migrations/202611120002_connected_device_invites.sql', import.meta.url), 'utf8'))
 }, 30_000)
 afterAll(async () => { await db?.close() })
 
@@ -56,12 +58,20 @@ it('allows writes from both devices and keeps strangers out', async () => {
   await expect(db.query("insert into public.happi_entries(user_id,id,mood,occurred_at) values($1,'bad','good',now())", [phone])).rejects.toThrow(/row-level security/)
 })
 
-it('consumes codes atomically and does not let a member issue further access', async () => {
+it('lets a recovered device invite another device to the same journal, without owner controls', async () => {
   expect(await redeem(consumedCode, stranger)).toMatchObject({ ok: false })
   await asUser(pc)
-  await expect(db.query('select public.happi_create_device_code($1,$2::jsonb)', ['PC', JSON.stringify(schedule)])).rejects.toThrow(/original device/)
+  const issued = await db.query<{ result: { code: string } }>('select public.happi_create_device_code($1,$2::jsonb) as result', ['PC', JSON.stringify(schedule)])
+  const code = issued.rows[0].result.code
+  expect(code).toMatch(/^[A-F0-9]{20}$/)
+  expect((await db.query<{ display_name: string }>('select display_name from public.happi_profiles')).rows[0].display_name).toBe('Phone journal')
+  expect((await db.query<{ ok: boolean }>('select public.happi_revoke_device($1) as ok', [limited])).rows[0].ok).toBe(false)
   expect((await db.query('select * from public.happi_list_devices()')).rows).toEqual([])
   await expect(db.query('select * from public.happi_device_codes')).rejects.toThrow(/permission denied/)
+  expect(await redeem(code, invited)).toMatchObject({ ok: true })
+  expect((await db.query<{ owner: string }>('select public.happi_journal_owner() as owner')).rows[0].owner).toBe(phone)
+  expect((await db.query('select id from public.happi_entries')).rows).toHaveLength(2)
+  expect(await redeem(code, stranger)).toMatchObject({ ok: false })
 })
 
 it('cannot reassign entry ownership or physically delete history', async () => {
@@ -96,15 +106,20 @@ it('refuses to overwrite or hide a device’s existing journal and leaves the co
   expect(await redeem(code, otherPc)).toMatchObject({ ok: true })
 })
 
-it('revokes access without touching the original phone journal', async () => {
+it('revokes access and outstanding invitations without touching the original phone journal', async () => {
+  await asUser(pc)
+  const issued = await db.query<{ result: { code: string } }>('select public.happi_create_device_code($1,$2::jsonb) as result', ['PC', JSON.stringify(schedule)])
   await asUser(stranger)
   expect((await db.query<{ ok: boolean }>('select public.happi_revoke_device($1) as ok', [pc])).rows[0].ok).toBe(false)
   await asUser(phone)
-  expect((await db.query('select * from public.happi_list_devices()')).rows).toHaveLength(3)
+  expect((await db.query('select * from public.happi_list_devices()')).rows).toHaveLength(4)
   expect((await db.query<{ ok: boolean }>('select public.happi_revoke_device($1) as ok', [pc])).rows[0].ok).toBe(true)
   await asUser(pc)
   expect((await db.query<{ owner: null }>('select public.happi_journal_owner() as owner')).rows[0].owner).toBeNull()
   expect((await db.query('select * from public.happi_entries')).rows).toEqual([])
+  await expect(db.query('select public.happi_create_device_code($1,$2::jsonb)', ['PC', JSON.stringify(schedule)])).rejects.toThrow(/disconnected/)
+  expect(await redeem(issued.rows[0].result.code, expiredDevice)).toMatchObject({ ok: false })
+  await asUser(pc)
   await expect(db.query("insert into public.happi_entries(user_id,id,mood,occurred_at) values($1,'new','good',now())", [pc])).rejects.toThrow(/row-level security/)
   await asUser(phone)
   expect((await db.query('select id from public.happi_entries')).rows).toHaveLength(2)
@@ -113,6 +128,8 @@ it('revokes access without touching the original phone journal', async () => {
 it('denies every device RPC and private table to unauthenticated callers', async () => {
   await db.exec('reset role; set role anon')
   await expect(db.query('select public.happi_journal_owner()')).rejects.toThrow(/permission denied/)
+  await expect(db.query('select public.happi_create_device_code($1,$2::jsonb)', ['PC', JSON.stringify(schedule)])).rejects.toThrow(/permission denied/)
+  await expect(db.query('select public.happi_revoke_device($1)', [pc])).rejects.toThrow(/permission denied/)
   await expect(db.query("select public.happi_redeem_device_code('00000000000000000000','PC')")).rejects.toThrow(/permission denied/)
   await expect(db.query('select * from public.happi_devices')).rejects.toThrow(/permission denied/)
 })

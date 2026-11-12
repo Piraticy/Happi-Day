@@ -35,13 +35,14 @@ export default function DeviceConnections({ client, journal, supported, original
 
   return <details aria-busy={busy} className="device-connections" onToggle={event => setOpen(event.currentTarget.open)}>
     <summary>Connect another device</summary>
-    {!supported ? <p>Connecting devices isn’t available yet. Keep your journal open here and try again later.</p> : !original ? <p>Manage connected devices from Journal options on your original phone.</p> : <>
-      <p>Open the app on your PC and choose <strong>Connect existing journal</strong>. Enter a code from here on the PC. Keep it private—it opens your journal.</p>
+    {!supported ? <p>Connecting devices isn’t available yet. Keep your journal open here and try again later.</p> : <>
+      <p>On your other device, open the app and choose <strong>Connect existing journal</strong>. Enter a code from here. Keep it private—it opens your journal and lets that device connect others.</p>
       <button type="button" className="text-button" disabled={busy} onClick={async () => {
         if (pending.current) return
         pending.current = true; setBusy(true); setError(''); setCopied(false)
         try {
           const result = await keepAppOpenUntil(client.rpc('happi_create_device_code', { p_display_name: journal.name, p_schedule: journal.schedule }))
+          if (!original && result.error?.message === 'Create the connection code on the original device.') throw new Error('Connecting from this device needs a one-time setup update. Ask the app owner to finish setup.')
           if (result.error || !/^[A-F0-9]{20}$/.test(result.data?.code ?? '') || !Number.isFinite(Date.parse(result.data?.expires_at ?? ''))) throw new Error('A connection code couldn’t be generated. Try again in a moment.')
           if (alive.current) { setNow(Date.now()); setCode(result.data) }
         } catch (caught) { if (alive.current) setError((caught as Error).message) }
@@ -49,18 +50,19 @@ export default function DeviceConnections({ client, journal, supported, original
       }}><MonitorSmartphone size={17} />{busy ? 'Working…' : code ? 'Generate a new code' : 'Generate connection code'}</button>
       {code && seconds > 0 && <div className="connection-code"><label htmlFor="phone-connection-code">One-use connection code</label><input id="phone-connection-code" readOnly value={code.code.match(/.{4}/g)!.join('-')} onFocus={event => event.target.select()} /><div className="connection-code-footer"><span>Expires in {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</span><button type="button" className="text-button" onClick={async () => { try { await navigator.clipboard.writeText(code.code.match(/.{4}/g)!.join('-')); if (alive.current) setCopied(true) } catch { if (alive.current) setError('Select the code and copy it manually.') } }}><Copy size={15} />{copied ? 'Copied' : 'Copy code'}</button></div></div>}
       {code && seconds === 0 && <p role="status">This code expired. Generate a new one.</p>}
-      <div className="section-heading"><h3>Connected devices</h3><button type="button" className="text-button" disabled={busy} onClick={() => { setError(''); void load().catch(caught => { if (alive.current) setError(caught.message) }) }}><RotateCcw size={14} />Refresh devices</button></div>
+      {original && <><div className="section-heading"><h3>Connected devices</h3><button type="button" className="text-button" disabled={busy} onClick={() => { setError(''); void load().catch(caught => { if (alive.current) setError(caught.message) }) }}><RotateCcw size={14} />Refresh devices</button></div>
       {devices.length ? <ul className="connected-device-list">{devices.map(device => <li key={device.device_id}><span><strong>{device.device_label}</strong><span>Connected {new Date(device.connected_at).toLocaleDateString()}</span></span><button type="button" className="text-button" disabled={busy} aria-label={`Remove ${device.device_label}`} onClick={async () => {
         if (pending.current) return
         pending.current = true; setBusy(true); setError('')
         try {
           const result = await keepAppOpenUntil(client.rpc('happi_revoke_device', { p_device_id: device.device_id }))
           if (result.error || result.data !== true) throw new Error('This device couldn’t be removed. Refresh devices and try again.')
+          if (alive.current) { setCode(null); setCopied(false) }
           await load()
         } catch (caught) { if (alive.current) setError((caught as Error).message) }
         finally { pending.current = false; if (alive.current) setBusy(false) }
       }}>Remove</button></li>)}</ul> : <p>No other devices connected yet.</p>}
-      <p>Remove a device to stop it opening your journal. Your history stays saved.</p>
+      <p>Remove a device to stop it opening your journal. Unused codes will expire too. Your history stays saved.</p></>}
     </>}
     {error && <p className="error-message" role="alert">{error}</p>}
   </details>

@@ -27,7 +27,7 @@ With Supabase configured, enter a username and choose **Start my journal**. No p
 
 **A username is a display label, not a login credential.** Entering the same username in another browser creates a different private journal. Signing out or clearing browser data can remove access to an anonymous journal. The app warns before anonymous sign-out.
 
-To access your open phone journal on a PC without email, follow [Connect your devices](docs/connect-devices.md). On the phone, choose **Journal options → Connect another device → Generate connection code**. On the PC welcome screen, choose **Connect existing journal** and enter that code. The phone stays signed in, and both devices read and save the same cloud history. Codes expire after ten minutes and work once. Apply the additional SQL migration below before pairing.
+To access your open phone journal on a PC without email, follow [Connect your devices](docs/connect-devices.md). On the phone, choose **Journal options → Connect another device → Generate connection code**. On the PC welcome screen, choose **Connect existing journal** and enter that code. The phone stays signed in, and both devices read and save the same cloud history. Codes expire after ten minutes and work once. Any actively connected device can invite another after the additional SQL migrations below are applied. Only connect devices you trust: they can read, save and invite further devices.
 
 Optional email recovery remains available: open **Journal options → Keep this journal accessible**, add an email, and confirm its link before leaving the original session. Then use **Use an email link instead** on the other device. Sending a recovery link does not mean the email has been verified.
 
@@ -35,10 +35,10 @@ Connected devices check for saved history and schedule changes every **15 second
 
 ### Recovery quick guide
 
-- **Still signed in on the original device:** keep it open. Choose **Journal options → Connect another device → Generate connection code**. On the other device choose **Connect existing journal**.
+- **Still signed in on any connected device:** keep it open. Choose **Journal options → Connect another device → Generate connection code**. On the other device choose **Connect existing journal**.
 - **Confirmed a recovery email:** use **Use an email link instead** with that address. Adding an address without confirming it does not enable recovery.
 - **Signed out everywhere, with no confirmed email:** a username alone cannot restore access. The Supabase project administrator must identify the original journal by its full user ID and saved entries, then issue a one-use connection code for that exact journal. Do not select a journal by name alone, delete tables, or disable access rules.
-- **Recovered using an administrator-issued code:** you can read and save the original history. This is a connected device, not the original session; generating codes and removing devices from the dashboard still requires the original session. If it is lost, the administrator must issue a fresh code for each additional device.
+- **Recovered using an administrator-issued code:** you can read and save the original history. After the one-time [connected-device invitation update](supabase/migrations/202611120002_connected_device_invites.sql), open **Journal options → Connect another device → Generate connection code** on the recovered device. No SQL is needed for later invitations. Removing connected devices still requires the original session or help from the project administrator.
 
 **SQL belongs in Supabase → SQL Editor. Only the resulting `connection_code` belongs in the app.** Copy the entire result cell: the ungrouped code has **20 letters/numbers**, even if the results column displays only part of it. Codes work once, expire after **10 minutes**, and are replaced when a new code is generated. If expired, generate a new code; do not rerun the table-creation migration. Never share codes or session tokens in GitHub issues, screenshots, or chat.
 
@@ -91,7 +91,7 @@ Without Supabase environment variables, the app opens a clearly labeled local de
 
 Follow the [Supabase setup guide](docs/supabase-setup.md) for the full procedure.
 
-1. Create a Supabase project and run [the database migration](supabase/migrations/202611100001_cloud_journal.sql) once. It creates profiles, mood entries, validation rules, and row-level security policies restricting records to their owner's `auth.uid()`. Then run [the device-connection migration](supabase/migrations/202611120001_device_connections.sql) once to allow explicitly connected devices to access that same owner's journal. This keeps existing identities and data in place; it does not copy rows or open public access.
+1. Create a Supabase project and run [the database migration](supabase/migrations/202611100001_cloud_journal.sql) once. It creates profiles, mood entries, validation rules, and row-level security policies restricting records to their owner's `auth.uid()`. Then run [the device-connection migration](supabase/migrations/202611120001_device_connections.sql) once to allow explicitly connected devices to access that same owner's journal. Then run [the connected-device invitation update](supabase/migrations/202611120002_connected_device_invites.sql) once so recovered devices can generate codes too. These keep existing identities and data in place; they do not copy rows or open public access.
 2. Enable **Allow new users to sign up**, **Allow anonymous sign-ins**, and **Allow manual linking** in Authentication → Sign In / Providers. Keep **Confirm email** enabled.
 3. Copy `.env.example` to `.env.local` and set the public connection values:
 

@@ -248,7 +248,7 @@ The outlined Install app control becomes an icon on phone and disappears after v
 
 ## Connect an existing journal
 
-The Operate welcome surface separates **Connect existing journal** from creating a new username journal. Connection uses the existing pale fields, outlined coral action, plum headings and visible focus. Code entry is paired with a written device name and explicit inline errors; a failed connection keeps inputs available for retry. On the original phone, a native disclosure inside Journal options contains generation, a selectable grouped code, copy action, visible expiry and a divided connected-device list. Linked devices see an explanation rather than owner controls. No new palette, fonts, shadows or image assets are introduced.
+The Operate welcome surface separates **Connect existing journal** from creating a new username journal. Connection uses the existing pale fields, outlined coral action, plum headings and visible focus. Code entry is paired with a written device name and explicit inline errors; a failed connection keeps inputs available for retry. On every connected device, including recovered sessions, a native disclosure inside Journal options contains generation, a selectable grouped code, copy action and visible expiry. Only the original session sees the divided connected-device list and removal controls. Instructions refer to the other device rather than assuming the source is a phone. No new palette, fonts, shadows or image assets are introduced.
 
 ## Release updates
 

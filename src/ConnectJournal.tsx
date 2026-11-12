@@ -21,7 +21,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
     event.preventDefault()
     if (pending.current || !client || !createDeviceClient) return
     const normalized = normalizeDeviceCode(code)
-    if (!redeemed.current && !/^[A-F0-9]{20}$/.test(normalized)) { setError('Enter the complete 20-character code from your phone.'); return }
+    if (!redeemed.current && !/^[A-F0-9]{20}$/.test(normalized)) { setError('Enter the complete 20-character code from your other device.'); return }
     if (!label.trim() || label.trim().length > 40) { setError('Name this device using 1–40 characters.'); return }
     pending.current = true; setBusy(true); setError('')
     try {
@@ -64,8 +64,8 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
     finally { pending.current = false; if (alive.current) setBusy(false) }
   }}>
     <MonitorSmartphone size={30} strokeWidth={1.5} className="connect-mark" />
-    <h2>Your phone’s journal.<br />Here, too.</h2>
-    <p>On your phone, open <strong>Journal options → Connect another device</strong> and generate a code. Enter it here to open that same history.</p>
+    <h2>Your journal.<br />Here, too.</h2>
+    <p>On a device where your journal is open, choose <strong>Journal options → Connect another device</strong> and generate a code. Enter it here to open that same history.</p>
     <label htmlFor="device-code">Connection code</label>
     <input id="device-code" value={code} onChange={event => setCode(event.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="ABCD-1234-ABCD-1234-ABCD" maxLength={29} disabled={busy || joined} required />
     <label htmlFor="device-name">Name this device</label>
@@ -73,7 +73,7 @@ export default function ConnectJournal({ client, createDeviceClient, onBack }: {
     {error && <p className="error-message" role="alert">{error}</p>}
     {!createDeviceClient && <p className="error-message" role="alert">Connecting devices isn’t available here yet.</p>}
     <button className="primary-button" type="submit" disabled={busy || !client || !createDeviceClient}>{busy ? 'Connecting…' : joined ? 'Finish connecting' : 'Connect my journal'}<ArrowRight size={19} /></button>
-    <p className="auth-help">This code works once and expires in 10 minutes. Your phone stays signed in.</p>
+    <p className="auth-help">This code works once and expires in 10 minutes. Your other device stays signed in.</p>
     <button type="button" className="text-button" disabled={busy} onClick={onBack}>Back to journal entry</button>
   </form>
 }
