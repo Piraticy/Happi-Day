@@ -84,7 +84,7 @@ export default function CloudAccount({ client, createDeviceClient, setupError = 
       const loaded = await repository.load()
       if (owner.current === id && epoch.current === request) setCloud({ owner: id, journal: loaded.journal, journalOwner: loaded.ownerId, connections: loaded.connections, error: '', loading: false })
     } catch (error) {
-      if (owner.current === id && epoch.current === request) setCloud(current => ({ ...current, loading: false, error: (error as Error).message }))
+      if (owner.current === id && epoch.current === request) setCloud(current => quiet && current.journal ? current : ({ ...current, loading: false, error: (error as Error).message }))
     } finally { if (reading.current === request) reading.current = null }
   }, [repository, user?.id])
 

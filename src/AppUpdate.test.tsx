@@ -39,7 +39,7 @@ it('prompts two open device clients for the same new deployment', async () => {
 it('Later preserves a draft and remembered session, and can reopen the update prompt', async () => {
   release = 'next'
   localStorage.setItem('remembered-auth', 'private-session')
-  render(<><CheckIn slots={freshJournal().schedule} entries={[]} onSave={() => true} /><AppUpdate currentVersion="current" onUpdate={vi.fn()} /></>)
+  render(<><CheckIn onSave={() => true} /><AppUpdate currentVersion="current" onUpdate={vi.fn()} /></>)
   fireEvent.click(screen.getByLabelText('Good'))
   fireEvent.click(screen.getByRole('button', { name: 'Add a reason optional' }))
   fireEvent.change(screen.getByRole('textbox', { name: 'Your own reason' }), { target: { value: 'Keep my unfinished words' } })

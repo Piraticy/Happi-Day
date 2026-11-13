@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Trash2 } from 'lucide-
 import { localDay, MOODS } from './model'
 import type { Entry } from './model'
 import Panel from './Panel'
+import Insights from './Insights'
 import { MoodFace } from './Icons'
 import type { SaveResult } from './CheckIn'
 
@@ -27,15 +28,24 @@ export default function History({ entries, onDelete, onCheckIn }: { entries: Ent
   const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(0)
   const filtered = entries.filter(entry => filter === 'all' || entry.mood === filter).sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-  const totalPages = Math.max(1, Math.ceil(filtered.length / 2))
+  const totalPages = Math.max(1, Math.ceil(filtered.length / 6))
   const currentPage = Math.min(page, totalPages - 1)
-  const visible = filtered.slice(currentPage * 2, currentPage * 2 + 2)
+  const visible = filtered.slice(currentPage * 6, currentPage * 6 + 6)
   const days = [...new Set(visible.map(entry => localDay(new Date(entry.timestamp))))].sort().reverse()
+  function exportHistory() {
+    const url = URL.createObjectURL(new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), entries }, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `happi-day-history-${localDay(new Date())}.json`
+    link.click()
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
   return <div className="history-page">
     <div className="page-intro"><h1>Your little moments, kept.</h1><p>A place for every kind of day.</p></div>
+    <div className="history-tools"><Insights entries={entries} />{entries.length > 0 && <button className="text-button desktop-export" type="button" onClick={exportHistory}>Download history</button>}</div>
     {entries.length > 0 && <div className="history-toolbar"><p>{entries.length} {entries.length === 1 ? 'moment' : 'moments'} recorded</p><label>Show <select value={filter} onChange={event => { setFilter(event.target.value); setPage(0) }} aria-label="Filter history by mood"><option value="all">All moods</option>{MOODS.map(mood => <option key={mood.id} value={mood.id}>{mood.label}</option>)}</select></label></div>}
     {days.length === 0 ? <div className="empty-history"><BookOpen size={32} strokeWidth={1.4} /><h2>{entries.length ? 'No moments with this mood yet.' : 'Your story starts with a check-in.'}</h2><p>{entries.length ? 'Try another mood or show all your moments.' : 'The small moments count. Save your first one whenever you’re ready.'}</p>{!entries.length && <button className="primary-button" onClick={onCheckIn}>Make a check-in <ArrowRight size={18} /></button>}</div>
       : days.map(day => <section className="history-day" key={day}><h2>{new Date(`${day}T12:00:00`).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</h2><EntryList entries={visible.filter(entry => localDay(new Date(entry.timestamp)) === day)} onDelete={onDelete} /></section>)}
-    {filtered.length > 2 && <div className="page-controls"><button type="button" className="icon-button" aria-label="Newer moments" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={20} /></button><span aria-live="polite">Page {currentPage + 1} of {totalPages}</span><button type="button" className="icon-button" aria-label="Older moments" disabled={currentPage === totalPages - 1} onClick={() => setPage(currentPage + 1)}><ChevronRight size={20} /></button></div>}
+    {filtered.length > 6 && <div className="page-controls"><button type="button" className="icon-button" aria-label="Newer moments" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={20} /></button><span aria-live="polite">Page {currentPage + 1} of {totalPages}</span><button type="button" className="icon-button" aria-label="Older moments" disabled={currentPage === totalPages - 1} onClick={() => setPage(currentPage + 1)}><ChevronRight size={20} /></button></div>}
   </div>
 }

@@ -17,3 +17,11 @@ it('lets people page through all daily activities without expanding the page', (
   fireEvent.click(screen.getByRole('button', { name: 'About these ideas' }))
   expect(screen.getByRole('dialog', { name: 'About these ideas' })).toBeVisible()
 })
+
+it('offers a different light story on the next day', () => {
+  const view = render(<LittleLifts entries={[]} now={new Date(2026, 10, 13, 12)} />)
+  const story = screen.getByText('A little story for today').parentElement!.textContent
+  expect(screen.getByText('Today’s little puzzle')).toBeVisible()
+  view.rerender(<LittleLifts entries={[]} now={new Date(2026, 10, 14, 12)} />)
+  expect(screen.getByText('A little story for today').parentElement!.textContent).not.toBe(story)
+})

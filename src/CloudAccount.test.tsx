@@ -14,6 +14,7 @@ function backend() {
   const entries = new Map<string, Record<string, unknown>[]>()
   const requests: { path: string; body: Record<string, unknown> }[] = []
   let failReads = false
+  let failOwner = false
   let failWrites = false
   let failSignup = false
   let failRecovery = false
@@ -39,7 +40,7 @@ function backend() {
       const body = init?.body ? JSON.parse(String(init.body)) : {}
       requests.push({ path: url.pathname, body })
       const effective = memberships.has(owner) ? memberships.get(owner) : owner
-      if (url.pathname.endsWith('/rpc/happi_journal_owner')) return deviceSetup ? Response.json(effective) : Response.json({ code: 'PGRST202', message: 'Missing migration' }, { status: 404 })
+      if (url.pathname.endsWith('/rpc/happi_journal_owner')) return failOwner ? Response.json({ message: 'Unavailable' }, { status: 503 }) : deviceSetup ? Response.json(effective) : Response.json({ code: 'PGRST202', message: 'Missing migration' }, { status: 404 })
       if (url.pathname.endsWith('/rpc/happi_create_device_code')) {
         if (!memberInvites && memberships.has(owner)) return Response.json({ message: 'Create the connection code on the original device.' }, { status: 400 })
         if (!effective) return Response.json({ message: 'This device was disconnected.' }, { status: 400 })
@@ -98,10 +99,27 @@ function backend() {
     await act(async () => { const result = await client.auth.setSession({ access_token: token, refresh_token: `refresh-${id}` }); expect(result.error).toBeNull() })
   }
   function holdReads(id: string) { let release!: () => void; gates.set(id, new Promise<void>(resolve => { release = resolve })); return release }
-  return { client, entries, requests, login, holdReads, makeClient, memberships, codes, profiles, deviceLabels, memberInvites: (enabled: boolean) => { memberInvites = enabled }, dropRedeemResponse: () => { dropRedeemResponse = true }, deviceSetup: (enabled: boolean) => { deviceSetup = enabled }, failReads: () => { failReads = true }, failWrites: (fail: boolean) => { failWrites = fail }, failSignup: (fail: boolean) => { failSignup = fail }, failRecovery: (fail: boolean) => { failRecovery = fail } }
+  return { client, entries, requests, login, holdReads, makeClient, memberships, codes, profiles, deviceLabels, memberInvites: (enabled: boolean) => { memberInvites = enabled }, dropRedeemResponse: () => { dropRedeemResponse = true }, deviceSetup: (enabled: boolean) => { deviceSetup = enabled }, failReads: () => { failReads = true }, failOwner: (fail: boolean) => { failOwner = fail }, failWrites: (fail: boolean) => { failWrites = fail }, failSignup: (fail: boolean) => { failSignup = fail }, failRecovery: (fail: boolean) => { failRecovery = fail } }
 }
 
 describe('real SDK integration at the network boundary', () => {
+  it('keeps an open journal visible through a failed background connection check and reports manual failure', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    const server = backend()
+    render(<CloudAccount client={server.client} onDemo={() => {}} />)
+    await server.login('alex')
+    await screen.findByRole('radio', { name: 'Good' })
+    server.failOwner(true)
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000) })
+    expect(screen.getByRole('radio', { name: 'Good' })).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh history' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Your journal connection couldn’t be checked')
+    server.failOwner(false)
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh history' }))
+    await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+  })
+
   it('automatically retrieves other-device changes without losing an unfinished check-in', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
     const server = backend()
@@ -160,7 +178,7 @@ describe('real SDK integration at the network boundary', () => {
     expect(screen.getByRole('button', { name: 'Journal options' })).toHaveTextContent('Alex')
     expect(server.requests.find(request => request.path.endsWith('/signup'))?.body.data).toEqual({ first_name: 'Alex' })
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     await waitFor(() => expect(server.entries.get('anonymous-1')).toHaveLength(1))
     app.unmount()
     render(<CloudAccount client={server.client} onDemo={() => {}} />)
@@ -199,12 +217,12 @@ describe('real SDK integration at the network boundary', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Start my journal' }))
     await screen.findByRole('radio', { name: 'Good' })
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     await waitFor(() => expect(server.entries.get('anonymous-1')).toHaveLength(1))
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
     fireEvent.click(screen.getByRole('button', { name: 'Journal options' }))
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
-    expect(screen.getByRole('button', { name: 'Save check-in' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save this moment' })).toBeInTheDocument()
     expect(server.requests.some(request => request.path.endsWith('/logout'))).toBe(false)
     confirm.mockReturnValue(true)
     fireEvent.click(screen.getByRole('button', { name: 'Journal options' }))
@@ -230,7 +248,7 @@ describe('real SDK integration at the network boundary', () => {
     expect(await screen.findByRole('status')).toHaveTextContent(/confirm/i)
     const request = server.requests.find(request => request.path.endsWith('/user') && request.body.email)
     expect(request?.body.email).toBe('alex@example.com')
-    expect(screen.getByRole('button', { name: 'Save check-in' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save this moment' })).toBeInTheDocument()
     expect(server.requests.filter(request => request.path.endsWith('/signup'))).toHaveLength(1)
   })
 
@@ -260,7 +278,7 @@ describe('real SDK integration at the network boundary', () => {
     expect(screen.getByLabelText('Recovery email')).toHaveValue('alex@example.com')
     fireEvent.click(screen.getByRole('button', { name: 'Close your journal' }))
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     await waitFor(() => expect(server.entries.get('anonymous-1')).toHaveLength(1))
   })
 
@@ -273,7 +291,7 @@ describe('real SDK integration at the network boundary', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send sign-in link' }))
     expect(await screen.findByText('Check your inbox')).toBeInTheDocument()
     expect(server.requests.find(request => request.path.endsWith('/otp'))?.body.email).toBe('alex@example.com')
-    expect(screen.queryByRole('button', { name: 'Save check-in' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Save this moment' })).not.toBeInTheDocument()
   })
 
   it('saves cloud moods without writing or automatically importing the shared demo journal', async () => {
@@ -290,7 +308,7 @@ describe('real SDK integration at the network boundary', () => {
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Cloud moment' } })
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     await waitFor(() => expect(server.entries.get('alex')?.[0].note).toBe('Cloud moment'))
     fireEvent.click(screen.getByText('Today’s moments'))
     expect(await screen.findByText('Cloud moment')).toBeVisible()
@@ -306,7 +324,7 @@ describe('real SDK integration at the network boundary', () => {
     render(<CloudAccount client={server.client} onDemo={() => {}} />)
     await server.login('alex')
     expect(await screen.findByRole('alert')).toHaveTextContent(/couldn’t load/i)
-    expect(screen.queryByRole('button', { name: 'Save check-in' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Save this moment' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Retry loading' })).toBeInTheDocument()
   })
 
@@ -352,20 +370,19 @@ describe('real SDK integration at the network boundary', () => {
     const savedIds: string[] = []
     let complete!: (value: boolean) => void
     const onSave = (entry: { id: string }) => { savedIds.push(entry.id); return new Promise<boolean>(resolve => { complete = resolve }) }
-    const view = render(<CheckIn slots={freshJournal().schedule} entries={[]} onSave={onSave} />)
+    const view = render(<CheckIn onSave={onSave} />)
     fireEvent.click(screen.getByRole('radio', { name: 'Okay' }))
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Keep this draft' } })
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     expect(screen.getByRole('button', { name: 'Saving…' })).toBeDisabled()
     await act(async () => complete(false))
     fireEvent.click(screen.getByRole('button', { name: /Edit your reason/ }))
     expect(screen.getByLabelText('Your own reason')).toHaveValue('Keep this draft')
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
-    view.rerender(<CheckIn slots={freshJournal().schedule} entries={[{ id: savedIds[0], mood: 'okay', reasons: [], note: 'Keep this draft', timestamp: '2026-11-10T09:00:00.000Z', slotId: 'morning' }]} onSave={onSave} />)
-    expect(screen.getByLabelText('Checking in for')).toHaveValue('morning')
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    view.rerender(<CheckIn onSave={onSave} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     expect(savedIds[0]).toBe(savedIds[1])
     await act(async () => complete(true))
     expect(screen.queryByLabelText('Your own reason')).not.toBeInTheDocument()
@@ -383,7 +400,7 @@ describe('real SDK integration at the network boundary', () => {
     await screen.findByRole('button', { name: 'Refreshing…' })
     server.failWrites(true)
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     await screen.findByRole('alert')
     expect(screen.getByRole('button', { name: 'Refresh history' })).toBeEnabled()
     await act(async () => { release(); await Promise.resolve() })
@@ -417,7 +434,7 @@ describe('phone-to-PC connection', () => {
     expect(pc.getByText('Already saved on phone')).toBeVisible()
     fireEvent.click(pc.getByRole('button', { name: 'Today' }))
     fireEvent.click(pc.getByRole('radio', { name: 'Okay' }))
-    fireEvent.click(pc.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(pc.getByRole('button', { name: 'Save this moment' }))
     await waitFor(() => expect(server.entries.get(phoneId)).toHaveLength(2))
     fireEvent.click(screen.getByRole('button', { name: 'Close your journal' }))
     fireEvent.click(phone.getByRole('button', { name: 'Refresh history' }))
@@ -516,7 +533,7 @@ describe('phone-to-PC connection', () => {
     render(<CloudAccount client={server.client} onDemo={() => {}} />)
     await server.login('legacy')
     fireEvent.click(await screen.findByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     await waitFor(() => expect(server.entries.get('legacy')).toHaveLength(1))
     fireEvent.click(screen.getByRole('button', { name: 'Journal options' }))
     fireEvent.click(screen.getByText('Connect another device'))
@@ -549,7 +566,7 @@ describe('phone-to-PC connection', () => {
     await server.login('pc')
     fireEvent.click(await screen.findByRole('radio', { name: 'Okay' }))
     server.memberships.set('pc', null)
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     expect(await screen.findByRole('alert')).toHaveTextContent(/was disconnected/)
     expect(screen.getByRole('radio', { name: 'Okay' })).toBeChecked()
     expect(server.entries.size).toBe(0)

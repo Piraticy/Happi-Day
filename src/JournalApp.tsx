@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { SaveResult } from './CheckIn'
-import { ArrowRight, BookOpen, Check, Clock3, Heart, House, LogOut, RotateCcw, ShieldCheck, SlidersHorizontal, Sprout, X } from 'lucide-react'
+import { ArrowRight, BookOpen, Check, Heart, House, LogOut, RotateCcw, ShieldCheck, SlidersHorizontal, Sprout, X } from 'lucide-react'
 import CheckIn from './CheckIn'
 import Panel from './Panel'
 import useSectionSwipe from './useSectionSwipe'
 import LittleLifts from './LittleLifts'
 import History, { EntryList } from './History'
-import Schedule, { DailyRhythm } from './Schedule'
+import Insights from './Insights'
 import { Brand, MoodFace } from './Icons'
 import { DEMO_KEY, freshJournal, localDay, MOODS, readJournal, writeJournal } from './model'
 import type { Entry, Journal } from './model'
 
 type View = 'today' | 'lifts' | 'history'
-const pages = [{ id: 'today', label: 'Today', Icon: House }, { id: 'lifts', label: 'Little lifts', Icon: Sprout }, { id: 'history', label: 'History', Icon: BookOpen }, { id: 'rhythm', label: 'Your rhythm', Icon: Clock3 }] as const
+const pages = [{ id: 'today', label: 'Today', Icon: House }, { id: 'lifts', label: 'Little lifts', Icon: Sprout }, { id: 'history', label: 'History', Icon: BookOpen }] as const
 
 function load(): { journal: Journal | null; error: string } {
   try { return { journal: readJournal(window.localStorage), error: '' } }
@@ -38,7 +38,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
   })
   const [name, setName] = useState(loaded.journal?.name ?? '')
   const [view, setView] = useState<View>('today')
-  const [panel, setPanel] = useState<'moments' | 'rhythm' | 'account' | null>(null)
+  const [panel, setPanel] = useState<'moments' | 'account' | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [deleted, setDeleted] = useState<Entry | null>(null)
@@ -47,7 +47,6 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
   const journal = cloud?.journal ?? loaded.journal ?? freshJournal()
   const todayEntries = journal.entries.filter(entry => localDay(new Date(entry.timestamp)) === localDay(now))
 
-  const plannedDone = journal.schedule.filter(slot => todayEntries.some(entry => entry.slotId === slot.id)).length
 
   useEffect(() => {
     const update = () => setNow(new Date())
@@ -77,8 +76,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
     } catch (caught) { setError((caught as Error).message); return false }
   }
 
-  function navigate(next: View | 'rhythm') {
-    if (next === 'rhythm') { setPanel('rhythm'); return }
+  function navigate(next: View) {
     setView(next)
     mainRef.current?.focus({ preventScroll: true })
   }
@@ -138,7 +136,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         {cloud?.accountControls}
         {onCloudLogin && <button className="text-button" type="button" onClick={onCloudLogin}>Sign in to your journal</button>}
         <div className="demo-explanation"><ShieldCheck size={20} /><p>Demo entries stay in this browser. Anyone using it can see them.</p></div>
-        <p className="welcome-return-note">{journal.entries.length ? 'Welcome back. Your saved moments are still here.' : 'Start with three daily check-ins. Add more whenever you need.'}</p>
+        <p className="welcome-return-note">{journal.entries.length ? 'Welcome back. Your saved moments are still here.' : 'Check in whenever you like. Your moments will be here.'}</p>
       </form>
     </section>
   </div>
@@ -154,7 +152,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         if (index < 0) return
         event.preventDefault()
         buttons[(index + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : buttons.length - 1)) % buttons.length].focus()
-      }}>{pages.map(({ id, label, Icon }) => <button key={id} className={view === id ? 'active' : ''} aria-current={view === id ? 'page' : undefined} aria-haspopup={id === 'rhythm' ? 'dialog' : undefined} onClick={() => navigate(id)}><Icon size={20} strokeWidth={1.7} /><span>{label}</span></button>)}</nav>
+      }}>{pages.map(({ id, label, Icon }) => <button key={id} className={view === id ? 'active' : ''} aria-current={view === id ? 'page' : undefined} onClick={() => navigate(id)}><Icon size={20} strokeWidth={1.7} /><span>{label}</span></button>)}</nav>
       <div className="sidebar-bottom"><div className="sidebar-message"><Heart size={23} strokeWidth={1.4} /><p>Every feeling<br />has a place here.</p></div><span className="sidebar-demo">{cloud ? 'Your journal' : 'Demo · only here'}</span><p className="leave-note">{cloud ? cloud.identity : 'Your moments stay on this browser.'}</p></div>
     </aside>
     <div className="workspace">
@@ -166,12 +164,8 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         <div className="page-view" role="region" aria-label="Journal pages" {...swipe}>
           <div className="today-layout" hidden={view !== 'today'}>
             <div className="page-intro checkin-intro"><h1>How are you<br />feeling today?</h1><p>A little check-in. A little more in tune.</p></div>
-            <aside className="daily-panel">
-              <DailyRhythm slots={journal.schedule} entries={todayEntries} onEdit={() => setPanel('rhythm')} />
-              <button className="today-moments-button" type="button" aria-haspopup="dialog" onClick={() => setPanel('moments')}><BookOpen size={18} /><span>Today’s moments</span><span className="moment-count">{todayEntries.length}</span><ArrowRight size={16} /></button>
-            </aside>
-            <button type="button" className="mobile-rhythm text-button" onClick={() => setPanel('rhythm')}>{plannedDone} of {journal.schedule.length} planned check-ins <span>View times <ArrowRight size={14} /></span></button>
-            <CheckIn slots={journal.schedule} entries={todayEntries} onSave={entry => afterSave(save({ ...journal, entries: [...journal.entries, entry] }), () => { setNow(new Date()); setNotice('A little moment, saved.'); setDeleted(null) })} />
+            <aside className="daily-panel"><div className="section-heading"><h2>Today, as it happens</h2></div><p className="rhythm-description">{todayEntries.length ? `${todayEntries.length} ${todayEntries.length === 1 ? 'moment' : 'moments'} saved today` : 'A fresh page for today.'}</p><Insights entries={journal.entries} /><button className="today-moments-button" type="button" aria-haspopup="dialog" onClick={() => setPanel('moments')}><BookOpen size={18} /><span>Today’s moments</span><span className="moment-count">{todayEntries.length}</span><ArrowRight size={16} /></button></aside>
+            <CheckIn onSave={entry => afterSave(save({ ...journal, entries: [...journal.entries, entry] }), () => { setNow(new Date()); setNotice('A little moment, saved.'); setDeleted(null) })} />
             <button type="button" className="lift-invitation" onClick={() => navigate('lifts')}><Sprout size={20} /><span>A small idea for your day<span>Discover your daily little lifts</span></span><ArrowRight size={18} /></button>
           </div>
           {view === 'lifts' && <LittleLifts key={localDay(now)} entries={journal.entries} now={now} />}
@@ -179,10 +173,9 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         </div>
       </main>
     </div>
-    {panel && <Panel title={panel === 'moments' ? 'Today’s moments' : panel === 'rhythm' ? 'Your rhythm' : 'Your journal'} onClose={() => setPanel(null)}>
+    {panel && <Panel title={panel === 'moments' ? 'Today’s moments' : 'Your journal'} onClose={() => setPanel(null)}>
       {errorBanner}
       {panel === 'moments' && (todayEntries.length ? <EntryList entries={todayEntries} onDelete={removeEntry} /> : <div className="today-empty"><Heart size={24} /><p>A fresh page for today.</p><span>Your first check-in will live here.</span></div>)}
-      {panel === 'rhythm' && <Schedule slots={journal.schedule} onSave={slots => save({ ...journal, schedule: slots })} />}
       {panel === 'account' && <><p className="account-summary">{cloud ? cloud.identity : `Demo · ${journal.name}`}</p>{cloud?.accountControls}{onCloudLogin && <button className="text-button" type="button" onClick={onCloudLogin}>Sign in to your journal</button>}<button className="text-button account-leave" disabled={cloud?.busy} onClick={leave}><LogOut size={18} />{cloud ? 'Sign out' : 'Leave demo'}</button></>}
       {confirmation}
     </Panel>}

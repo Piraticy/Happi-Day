@@ -721,3 +721,31 @@ body:has(.app-update-offer) .notice { bottom: 82px; }
   .app-update-content { font-size: 14px; }
   body:has(.app-update-offer) .notice { bottom: calc(150px + env(safe-area-inset-bottom)); }
 }
+/* Free check-ins and compact daily extras. */
+.moment-time { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.daily-panel { display: flex; flex-direction: column; justify-content: space-between; }
+.lifts-extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.daily-story, .daily-puzzle, .insights { border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: var(--field, #fff9f2); }
+.daily-story h2, .daily-puzzle h2, .insights h2 { font-family: var(--heading); font-size: 19px; margin: 0 0 10px; }
+.daily-story p, .daily-puzzle p, .insights p { font-size: 14px; margin: 0 0 8px; }
+.daily-story span, .insight-note { color: var(--muted); font-size: 12px; }
+.daily-puzzle form { display: flex; gap: 10px; align-items: center; }
+.daily-puzzle input { width: min(100%, 150px); min-height: 42px; border: 1px solid var(--line); border-radius: 9px; padding: 8px; background: var(--ground); }
+.insights { margin-bottom: 16px; }
+.insight-bars { display: grid; gap: 6px; margin: 12px 0; }
+.insight-bars > div { display: grid; grid-template-columns: 50px minmax(0, 1fr) 22px; align-items: center; gap: 8px; font-size: 12px; }
+.insight-bars meter { width: 100%; }
+@media (max-width: 760px) { .lifts-extras { grid-template-columns: 1fr; } }
+
+.history-tools { display: grid; gap: 6px; }
+.desktop-export { justify-self: end; margin-bottom: 10px; }
+@media (max-width: 760px) { .desktop-export { display: none; } }
+
+.daily-panel .insights { background: transparent; border: 0; padding: 0; margin: 14px 0; overflow: auto; }
+@media (max-width: 760px) {
+  .today-layout { grid-template-rows: auto minmax(min-content, 1fr) auto; }
+  .checkin-form { grid-row: 2; }
+  .today-moments-button, .lift-invitation { grid-row: 3; }
+  .daily-panel { display: contents; }
+  .daily-panel > .section-heading, .daily-panel > .rhythm-description, .daily-panel > .insights { display: none; }
+}

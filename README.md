@@ -9,14 +9,14 @@ A mood journal for small daily check-ins, private cloud history, and gentle well
 - A distinctive Little moments typography treatment: expressive variable-font headings and wordmark, with clear journal text. Fonts are bundled with the app.
 - Five labeled moods: Low, Down, Okay, Good, and Great.
 - Optional suggested reasons and a custom note of up to 500 characters.
-- Three daily check-in times by default: 09:00, 14:00, and 20:00. Edit these, add more times, or record an extra moment whenever you want.
+- Check in whenever you like. Each saved moment records its time automatically.
 - Saved history with mood filtering, confirmed deletion, and undo.
-- A window-sized phone and PC interface with reasons, saved moments, account options and schedule editing in pop-up panels.
-- A wider desktop workspace with a persistent navigation rail and side-by-side check-in and daily rhythm. History pages through two moments; long notes open in a detail panel.
+- A window-sized phone and PC interface with reasons, saved moments, account options in pop-up panels.
+- A wider desktop workspace with a persistent navigation rail and side-by-side check-in and today’s saved moments. History shows six moments per page, mood patterns, and full notes in a detail panel. Desktop adds a private JSON history download.
 - An installable web app with its own window and app icon. The install button hides after confirmed installation, across reloads in the same browser profile, and inside standalone app windows.
 - New-release prompts on open phone, PC and installed-app sessions, with **Update now** and **Later**.
 - Touch swipes between Today, Little lifts and History outside forms and controls. Drag a panel header down, press Escape, or use its close button. Arrow keys move focus through navigation.
-- **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. View one daily activity at a time with Previous/Next controls. Activities are always optional; the library eventually repeats.
+- **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. View one daily activity at a time with Previous/Next controls. Activities are always optional; the library eventually repeats. Daily original humor stories and a small word puzzle add another light break.
 - Username sessions backed by Supabase, with private cloud saves and remembered browser sessions.
 - Connect an existing phone journal to a PC using a private, one-use code; no email or password required. Requires the additional device-connection migration.
 - Optional verified email recovery and explicit import of browser-local demo entries.
@@ -31,7 +31,7 @@ To access your open phone journal on a PC without email, follow [Connect your de
 
 Optional email recovery remains available: open **Journal options → Keep this journal accessible**, add an email, and confirm its link before leaving the original session. Then use **Use an email link instead** on the other device. Sending a recovery link does not mean the email has been verified.
 
-Connected devices check for saved history and schedule changes every **15 seconds** while the app is visible and online, and when you return to the app or reconnect. **Refresh history** is also available. Checks pause during saves and do not reset unfinished check-ins. This is periodic sync, not instant realtime or offline sync; changes must save successfully before another device can retrieve them. If two devices edit the schedule, the last successful save wins.
+Connected devices check for saved history changes every **15 seconds** while the app is visible and online, and when you return to the app or reconnect. **Refresh history** is also available. Checks pause during saves and do not reset unfinished check-ins. This is periodic sync, not instant realtime or offline sync; changes must save successfully before another device can retrieve them. A connection error can be transient; use Refresh history after reconnecting. Failed saves keep the draft for retry.
 
 ### Recovery quick guide
 
@@ -60,7 +60,7 @@ The 192px and 512px app icons in `public/icons/` are rasterizations of the proje
 
 Open the live app online and reload it once to receive the update checker. After that, the app checks its public release version every minute while visible, and when you return to it or reconnect. A new release opens **An update is ready** with **Update now** and **Later**. The same postponed release leaves an **Update available** reminder without repeatedly opening its panel; a different release can prompt again.
 
-Choose **Later** to finish a check-in. **Update now** reloads the app without clearing saved journal data or the remembered sign-in. Save unfinished check-ins and schedule changes first: they are not saved automatically by an update. Reload is blocked while a save, sign-in or other marked account operation is running.
+Choose **Later** to finish a check-in. **Update now** reloads the app without clearing saved journal data or the remembered sign-in. Save unfinished check-ins first: they are not saved automatically by an update. Reload is blocked while a save, sign-in or other marked account operation is running.
 
 The build emits `version.json` with the same release ID embedded in its JavaScript. Vercel serves that file and the entry HTML with `no-store` headers; hashed assets keep normal caching. Failed, invalid or timed-out checks retry quietly. No service worker, notification permission or push subscription is used, and version checks send no journal or account data.
 
@@ -70,7 +70,7 @@ A device running code from before this feature needs the initial manual reload. 
 
 **Journal options** is the profile/settings control at the top-right. It contains device connections, recovery, optional demo import, and sign-out. Reasons and Today’s moments open over the check-in without expanding the page; closing the reason panel retains the draft. Switching sections also keeps the unfinished check-in. Save still submits the entry explicitly.
 
-The shell fills the available viewport. Long lists and details scroll inside their own content area or panel when needed, including short landscape windows, enlarged text and soft keyboards. Content is not clipped merely to eliminate scrolling. The everyday check-in was visually checked at 375×667 and on a laptop-sized desktop window.
+The shell fills the available viewport. Long lists and details scroll inside their own content area or panel when needed, including short landscape windows, enlarged text and soft keyboards. Content is not clipped merely to eliminate scrolling. The earlier check-in layout was visually checked at 375×667 and on a laptop-sized desktop window; this release still needs a visual check on both sizes.
 
 ## Run locally
 
@@ -143,7 +143,8 @@ The existing Vercel project `happi-day-little-moments` is connected to `Piraticy
 | `src/InstallApp.tsx`, `public/manifest.webmanifest` | Browser installation prompt, fallback instructions, and standalone app metadata |
 | `src/Panel.tsx`, `src/useSectionSwipe.ts` | Native pop-up panels and guarded touch navigation |
 | `src/JournalApp.tsx` | Shared journal interface and local demo |
-| `src/CheckIn.tsx`, `src/History.tsx`, `src/Schedule.tsx` | Mood entry, history, and daily times |
+| `src/CheckIn.tsx`, `src/History.tsx`, `src/Insights.tsx` | Free check-ins, history, and descriptive mood patterns |
+| `src/DailyPuzzle.tsx` | Rotating daily word puzzle |
 | `src/LittleLifts.tsx`, `src/lifts.ts` | Daily wellbeing activities and rotation |
 | `src/model.ts` | Journal types, validation, local dates, and demo storage |
 | `src/Icons.tsx`, `src/styles.css` | Authored mood faces and responsive visual design |
@@ -152,7 +153,7 @@ The existing Vercel project `happi-day-little-moments` is connected to `Piraticy
 
 ## Current limits
 
-Scheduled times are a personal plan; notifications are not enabled. Little lifts offers general wellbeing suggestions and does not provide diagnosis, treatment, or a guaranteed mood improvement. Fonts are bundled locally.
+Older scheduled entries remain readable; new check-ins are spontaneous. Notifications are not enabled. Little lifts offers general wellbeing suggestions and does not provide diagnosis, treatment, or a guaranteed mood improvement. Fonts are bundled locally.
 
 Free Supabase projects can pause after a week of inactivity and require resuming in the dashboard. Cloud storage is not a guarantee of uninterrupted availability or a substitute for backups. See [Supabase's plan limits](https://supabase.com/pricing).
 

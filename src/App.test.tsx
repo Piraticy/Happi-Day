@@ -89,19 +89,19 @@ describe('Happi-Day local demo', () => {
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'A quiet day' } })
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     fireEvent.click(screen.getByRole('radio', { name: 'Okay' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries[0].note).toBe('A quiet day')
   })
 
   it('enters without a password and saves mood, preset reasons, and custom words', () => {
     enterDemo()
-    expect(screen.getByRole('button', { name: 'Save check-in' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Save this moment' })).toBeDisabled()
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Work' }))
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Finished a project' } })
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     fireEvent.click(screen.getByText('Today’s moments'))
     expect(screen.getByText('Finished a project')).toBeVisible()
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
@@ -111,38 +111,21 @@ describe('Happi-Day local demo', () => {
     fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
     expect(screen.getByLabelText('Your own reason')).toHaveValue('')
     fireEvent.click(screen.getByRole('radio', { name: 'Okay' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).entries).toHaveLength(2)
   })
 
-  it('edits check-in times, adds a fourth time, and keeps them after remounting', () => {
-    const app = enterDemo()
-    fireEvent.click(screen.getByRole('button', { name: 'Your rhythm' }))
-    fireEvent.change(screen.getByLabelText('Time for Morning'), { target: { value: '08:30' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Add a check-in time' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save rhythm' }))
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
-    expect(saved.schedule).toHaveLength(4)
-    expect(saved.schedule.find((slot: { id: string }) => slot.id === 'morning').time).toBe('08:30')
-    expect(screen.getByText(/rhythm saved/i)).toBeInTheDocument()
-    app.unmount()
-    render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: 'Your rhythm' }))
-    expect(screen.getByLabelText('Time for Morning')).toHaveValue('08:30')
-    expect(screen.getByLabelText('Name for check-in 4')).toBeInTheDocument()
-  })
-
-  it('permits a fourth entry after all three planned check-ins are complete', () => {
+  it('saves spontaneous moments with recorded timestamps and no assigned slot', () => {
     enterDemo()
     for (let count = 0; count < 4; count++) {
       fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-      fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     }
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
     expect(saved.entries).toHaveLength(4)
-    expect(saved.entries.slice(0, 3).map((entry: { slotId: string }) => entry.slotId)).toEqual(['morning', 'afternoon', 'evening'])
-    expect(saved.entries[3].slotId).toBeUndefined()
-    expect(screen.getByLabelText('Checking in for')).toHaveValue('')
+    expect(saved.entries.every((entry: { slotId?: string; timestamp: string }) => !entry.slotId && Number.isFinite(Date.parse(entry.timestamp)))).toBe(true)
+    expect(screen.queryByLabelText('Checking in for')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Your rhythm' })).not.toBeInTheDocument()
   })
 
   it('preserves the form when storage fails and saves it on retry', () => {
@@ -152,13 +135,13 @@ describe('Happi-Day local demo', () => {
     fireEvent.change(screen.getByLabelText('Your own reason'), { target: { value: 'Keep these words' } })
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     const failure = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Quota exceeded') })
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     expect(screen.getByRole('alert')).toHaveTextContent(/couldn’t save/i)
     fireEvent.click(screen.getByRole('button', { name: /Edit your reason/ }))
     expect(screen.getByLabelText('Your own reason')).toHaveValue('Keep these words')
     fireEvent.click(screen.getByRole('button', { name: 'Done' }))
     failure.mockRestore()
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     fireEvent.click(screen.getByText('Today’s moments'))
     expect(screen.getByText('Keep these words')).toBeVisible()
   })
@@ -190,7 +173,7 @@ describe('Happi-Day local demo', () => {
   it('keeps undo and keyboard focus inside the moments panel after deletion', () => {
     enterDemo()
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     fireEvent.click(screen.getByRole('button', { name: /Today’s moments/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete check-in' }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
@@ -200,23 +183,10 @@ describe('Happi-Day local demo', () => {
     expect(within(dialog).getByRole('article')).toBeVisible()
   })
 
-  it('shows failed schedule saves inside the active panel', async () => {
-    enterDemo()
-    fireEvent.click(screen.getByRole('button', { name: 'Your rhythm' }))
-    fireEvent.change(screen.getByLabelText('Time for Morning'), { target: { value: '08:30' } })
-    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
-    try {
-      fireEvent.click(screen.getByRole('button', { name: 'Save rhythm' }))
-      const dialog = screen.getByRole('dialog', { name: 'Your rhythm' })
-      expect(within(dialog).getByRole('alert')).toHaveTextContent(/couldn’t save/i)
-      expect(screen.getByLabelText('Time for Morning')).toHaveValue('08:30')
-    } finally { write.mockRestore() }
-  })
-
   it('shows failed deletion inside the moments panel without losing the entry', async () => {
     enterDemo()
     fireEvent.click(screen.getByRole('radio', { name: 'Good' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     fireEvent.click(screen.getByRole('button', { name: /Today’s moments/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete check-in' }))
     const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
@@ -231,7 +201,7 @@ describe('Happi-Day local demo', () => {
   it('leaves the demo without removing saved entries', () => {
     enterDemo()
     fireEvent.click(screen.getByRole('radio', { name: 'Great' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Save check-in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
     fireEvent.click(screen.getByRole('button', { name: 'Journal options' }))
     fireEvent.click(screen.getByRole('button', { name: 'Leave demo' }))
     expect(screen.getByRole('button', { name: 'Enter demo' })).toBeInTheDocument()

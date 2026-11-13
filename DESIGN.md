@@ -137,7 +137,7 @@ The palette combines warm surfaces with a dark plum structure and five distinct 
 - **Warm peach ground:** the page and mobile navigation background; reversed text on plum surfaces.
 - **Plum ink:** primary text, desktop rail, selected reason chips, selected mood outlines, and confirmation notices.
 - **Muted plum:** dates, secondary copy, labels, and supporting notes.
-- **Peach surface:** daily rhythm panel and subtle hover/selected areas.
+- **Peach surface:** today panel and subtle hover/selected areas.
 - **Warm line / field border:** dividers and form boundaries. Fields are a paler peach than the panel.
 - **Rail hover / rail active:** two lighter plum fields distinguish navigation state from the rail itself.
 
@@ -159,9 +159,9 @@ The Little moments display treatment uses Bricolage’s full variable font: widt
 
 ## Layout
 
-The app fills the viewport, retaining the plum rail on desktop and bottom navigation at widths up to 760px. The desktop workspace uses fluid gutters and a 1400px maximum content width. The check-in sits beside a compact rhythm panel; saved moments and schedule editing open in native dialogs. Phone prioritizes the wordmark/options, date, compact sync controls, mood question, plan link, five labeled moods, optional reason button and Save. Two compact bottom actions open saved moments and Little lifts. The shell reserves space for bottom navigation and safe-area padding.
+The app fills the viewport, retaining the plum rail on desktop and bottom navigation at widths up to 760px. The desktop workspace uses fluid gutters and a 1400px maximum content width. The check-in sits beside a today panel; saved moments and account settings open in native dialogs. Phone prioritizes the wordmark/options, date, compact sync controls, mood question, moments link, five labeled moods, optional reason button and Save. Two compact bottom actions open saved moments and Little lifts. The shell reserves space for bottom navigation and safe-area padding.
 
-The main page region and dialog body allow internal scrolling for long content, enlarged text and short windows; ordinary check-ins fit375×667 and the checked laptop viewport. History pages through two moments, full notes open in a panel, and Little lifts shows one daily activity at a time. The full viewport/panel behavior is described in the final section below.
+The main page region and dialog body allow internal scrolling for long content, enlarged text and short windows. History pages through six moments, full notes open in a panel, and Little lifts shows one daily activity at a time. The full viewport/panel behavior is described in the final section below.
 
 The welcome screen retains its two-column desktop composition and compact phone entry. The body supports a minimum width of320px. Native form controls, visible focus, reduced motion, and the existing palette and typefaces remain shared across both contexts.
 
@@ -189,11 +189,11 @@ Reason chips are bordered pills with a minimum height (40px), reducing to 36px o
 
 ### Cards / Containers
 
-The desktop daily panel groups rhythm and a button opening saved moments in one flat peach container. At narrower desktop widths padding reduces; on mobile the outer container dissolves into the ordered page flow. Saved entries are divided rows with a face, heading, time, reasons, optional note, and delete action rather than individually elevated cards.
+The desktop daily panel groups today’s count and a button opening saved moments in one flat peach container. At narrower desktop widths padding reduces; on mobile the outer container dissolves into the ordered page flow. Saved entries are divided rows with a face, heading, time, reasons, optional note, and delete action rather than individually elevated cards.
 
 ### Inputs / Fields
 
-The reason textarea and schedule inputs have pale peach fills, warm borders, and rounded corners. The textarea resizes vertically on desktop with a height range (92–280px); mobile starts at 72px and uses a larger font (16px). The welcome name field uses a near-white peach fill and a slightly different warm border. Selects remain native controls with compact surrounding styling.
+The reason textarea inputs have pale peach fills, warm borders, and rounded corners. The textarea resizes vertically on desktop with a height range (92–280px); mobile starts at 72px and uses a larger font (16px). The welcome name field uses a near-white peach fill and a slightly different warm border. Selects remain native controls with compact surrounding styling.
 
 All buttons, links, inputs, selects, and textareas receive a visible outline (3px) with an offset (4px). Plum rail and notice controls use peach focus outlines; mobile rail controls return to coral. Errors remain visible in darker coral text or a bordered pale-coral alert.
 
@@ -238,11 +238,11 @@ The cloud welcome defaults to Username and Start my journal, with short instruct
 
 ## Viewport workspace, panels and installation
 
-The journal shell fills `100dvh`, with a persistent desktop rail and a 72px header, or a 54px phone header and reserved bottom navigation. A flexible workspace uses up to 1400px of content. Today gives the main check-in and compact rhythm separate columns on desktop; phone uses a compact rhythm link and two bottom actions for saved moments and activities. Optional forms no longer add height to the page. Long content, zoom and small landscape windows may scroll inside the page region or panel to preserve access and legibility.
+The journal shell fills `100dvh`, with a persistent desktop rail and a 72px header, or a 54px phone header and reserved bottom navigation. A flexible workspace uses up to 1400px of content. Today gives the main check-in and today’s moments in separate columns on desktop; phone uses a compact moments link and two bottom actions for saved moments and activities. Optional forms no longer add height to the page. Long content, zoom and small landscape windows may scroll inside the page region or panel to preserve access and legibility.
 
-A shared native dialog handles optional reasons, saved moments, schedule editing, account controls, full notes and activity context. Desktop uses a centered peach panel; phone uses a bottom sheet with a grip. A translucent plum backdrop protects focus. Close, Escape, backdrop and deliberate downward header drag dismiss the panel. Nested Escape stops at the top panel. Focus returns to the trigger; deletion focuses a remaining control in the active panel. Errors, confirmation and Undo render inside the active panel rather than behind its inert backdrop. Reasons keep their draft when closed; the main check-in stays mounted across section navigation. Panel arrival is a short settling movement and respects reduced motion.
+A shared native dialog handles optional reasons, saved moments, account settings, account controls, full notes and activity context. Desktop uses a centered peach panel; phone uses a bottom sheet with a grip. A translucent plum backdrop protects focus. Close, Escape, backdrop and deliberate downward header drag dismiss the panel. Nested Escape stops at the top panel. Focus returns to the trigger; deletion focuses a remaining control in the active panel. Errors, confirmation and Undo render inside the active panel rather than behind its inert backdrop. Reasons keep their draft when closed; the main check-in stays mounted across section navigation. Panel arrival is a short settling movement and respects reduced motion.
 
-History displays two moments per page and clamps note previews to two lines, with the complete note available through Read note. Daily little lifts shows one of the day’s one to three activities at a time. Both retain explicit page controls. Horizontal touch navigation starts outside forms and interactive controls; vertical movement, cancellation and secondary touches do not change sections. Pinch zoom stays available. Buttons remain available everywhere, and arrow keys move navigation focus.
+History displays six moments per page and a descriptive mood summary and clamps note previews to two lines, with the complete note available through Read note. Daily little lifts shows one of the day’s one to three activities at a time. Both retain explicit page controls. Horizontal touch navigation starts outside forms and interactive controls; vertical movement, cancellation and secondary touches do not change sections. Pinch zoom stays available. Buttons remain available everywhere, and arrow keys move navigation focus.
 
 The outlined Install app control becomes an icon on phone and disappears after verified installation or standalone launch. The remembered flag is separate from journal data and contains no identity. The browser’s related-app API can detect a prior installation when supported; a fresh install offer resets the flag for reinstalling. The manifest’s self-reference uses the production app ID. Safari’s separate-storage behavior and browser detection limits are stated in the help/docs. App icons continue to derive from the authored smiling emblem.
 
@@ -257,3 +257,7 @@ An available release opens the existing native Panel with a plain heading, a war
 ## Interface language
 
 Keep everyday screens brief and familiar. Say **Your journal**, **Saving…** and **Add demo entries** rather than naming cloud storage, sessions or imports. The welcome form has no technical disclaimer. Put essential consequences beside their action: losing access at sign-out, saving unfinished work before updating, keeping connection codes private and the demo staying in this browser. Recovery and install help give only the next steps and relevant limits; provider and infrastructure details belong in setup documentation.
+
+## Spontaneous moments and daily extras
+
+Check-ins have no time selector; their save timestamp appears in History. Legacy schedule fields remain in stored journals for compatibility and existing entries keep their recorded times. Today uses its side panel for saved moments. Little lifts adds one original short story and a word puzzle that rotate with the local calendar day. Insights count recent recorded moods and selected reasons; they do not infer a cause or promise a mood change.

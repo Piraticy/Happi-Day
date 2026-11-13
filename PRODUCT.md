@@ -20,17 +20,17 @@ Make regular mood check-ins quick and simple. A person selects a mood and can ex
 
 ## Operating Context
 
-Three scheduled check-ins per day by default. Users can select their check-in times and increase the number of daily inputs.
+Users can check in whenever they want. Saving records the time automatically; there is no fixed daily schedule.
 
 ## Capabilities and Constraints
 
 - Select a mood type.
 - Select suggested reasons or enter a custom reason.
-- Three daily check-ins with an option to increase input.
+- Any number of spontaneous daily check-ins, each with an automatic timestamp.
 - Passwordless login page. The user explicitly chose a clearly labeled local demo login for this first version.
 - The user requested real passwordless sign-in and cross-device history, and selected Supabase. The live Supabase project and Vercel frontend are configured. The user subsequently chose username sessions without passwords.
 - Preserve the separate browser-local demo. Cloud journals use remembered Supabase anonymous sessions with a username display label and owner-based row-level access rules. Optional verified email linking provides recovery and access from another device; username alone cannot recover an existing identity. Import local entries only after an explicit choice; never upload them automatically.
-- Default labels: Morning, Afternoon, Evening, with editable 09:00, 14:00, and 20:00 times. Extra daily times and unscheduled check-ins are supported. This initial local preview does not deliver notifications.
+- Older scheduled entries remain in history. New entries are free check-ins. No notifications are sent.
 
 ## Brand Commitments
 
@@ -44,6 +44,6 @@ The initial repository contains README.md and an MIT LICENSE. There is no existi
 
 - Keep a check-in brief and easy to complete.
 - Let people express their own reason.
-- Make three check-ins a starting rhythm, with room for more.
+- Let people save a moment whenever they choose, with no daily target.
 - Keep the interface mobile-friendly.
 - Be explicit about the local demo's limitations.
