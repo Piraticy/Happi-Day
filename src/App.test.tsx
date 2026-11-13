@@ -60,6 +60,23 @@ describe('Happi-Day local demo', () => {
     expect(screen.getByLabelText('Your own reason')).toBeVisible()
   })
 
+  it('adds extra reason prompts as saved personal words without changing cloud preset labels', () => {
+    enterDemo()
+    fireEvent.click(screen.getByRole('radio', { name: 'Okay' }))
+    fireEvent.click(screen.getByRole('button', { name: /Add a reason/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Weather' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Music' }))
+    expect(screen.getByRole('button', { name: 'Weather' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Weather' })).toBeDisabled()
+    expect(screen.getByLabelText('Your own reason')).toHaveValue('Weather, music')
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Save this moment' }))
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+    expect(saved.entries[0]).toMatchObject({ reasons: [], note: 'Weather, music' })
+    expect(within(screen.getByText('moment today').closest('.today-glance') as HTMLElement).getByText('1')).toBeVisible()
+    expect(screen.getByText(/Latest: Okay at/)).toBeVisible()
+  })
+
   it('opens a separate daily lifts page with optional alternatives', () => {
     enterDemo()
     fireEvent.click(screen.getByRole('button', { name: 'Little lifts' }))

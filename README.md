@@ -8,15 +8,15 @@ A mood journal for small daily check-ins, private cloud history, and gentle well
 
 - A distinctive Little moments typography treatment: expressive variable-font headings and wordmark, with clear journal text. Fonts are bundled with the app.
 - Five labeled moods: Low, Down, Okay, Good, and Great.
-- Optional suggested reasons and a custom note of up to 500 characters.
+- Six optional reason categories, more quick prompts for your own words, and a custom note of up to 500 characters. Quick prompts save as part of the note, so existing cloud journals need no migration.
 - Check in whenever you like. Each saved moment records its time automatically.
 - Saved history with mood filtering, confirmed deletion, and undo.
 - A window-sized phone and PC interface with reasons, saved moments, account options in pop-up panels.
 - A wider desktop workspace with a persistent navigation rail and side-by-side check-in and today’s saved moments. History shows six moments per page, mood patterns, and full notes in a detail panel. Desktop adds a private JSON history download.
 - An installable web app with its own window and app icon. The install button hides after confirmed installation, across reloads in the same browser profile, and inside standalone app windows.
 - New-release prompts on open phone, PC and installed-app sessions, with **Update now** and **Later**.
-- Touch swipes between Today, Little lifts and History outside forms and controls. Drag a panel header down, press Escape, or use its close button. Arrow keys move focus through navigation.
-- **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. View one daily activity at a time with Previous/Next controls. Activities are always optional; the library eventually repeats. Daily original humor stories and a small word puzzle add another light break.
+- Touch swipes between Today, Little lifts and History outside forms and controls; swipe across the Little lifts activity card to page through ideas and across the extra reason prompts to browse them. Drag a panel header down, press Escape, or use its close button. Arrow keys move focus through navigation.
+- **Little lifts:** 31 original wellbeing suggestions that rotate daily. Start with one activity, increase to two and at most three across distinct check-in days, and optionally try other ideas. View one daily activity at a time with Previous/Next controls. Activities are always optional; the library eventually repeats. Twelve longer humor stories with a revealable ending and a daily word puzzle with an optional hint open from compact cards on Today and Little lifts.
 - Username sessions backed by Supabase, with private cloud saves and remembered browser sessions.
 - Connect an existing phone journal to a PC using a private, one-use code; no email or password required. Requires the additional device-connection migration.
 - Optional verified email recovery and explicit import of browser-local demo entries.
@@ -68,9 +68,9 @@ A device running code from before this feature needs the initial manual reload. 
 
 ## Using the fitted interface
 
-**Journal options** is the profile/settings control at the top-right. It contains device connections, recovery, optional demo import, and sign-out. Reasons and Today’s moments open over the check-in without expanding the page; closing the reason panel retains the draft. Switching sections also keeps the unfinished check-in. Save still submits the entry explicitly.
+**Journal options** is the profile/settings control at the top-right. It contains device connections, recovery, optional demo import, and sign-out. Reasons, Today’s moments, the daily story, and the puzzle open over the check-in without expanding the page; closing the reason panel retains the draft. Switching sections also keeps the unfinished check-in. Save still submits the entry explicitly.
 
-The shell fills the available viewport. Long lists and details scroll inside their own content area or panel when needed, including short landscape windows, enlarged text and soft keyboards. Content is not clipped merely to eliminate scrolling. The earlier check-in layout was visually checked at 375×667 and on a laptop-sized desktop window; this release still needs a visual check on both sizes.
+The shell fills the available viewport. Long lists and details scroll inside their own content area or panel when needed, including short landscape windows, enlarged text and soft keyboards. Content is not clipped merely to eliminate scrolling. The current Today and Little lifts layouts were visually checked in a local headless browser at 393×852, 375×667, and 1440×900. On short phones, the story and puzzle remain in Little lifts so the main check-in fits.
 
 ## Run locally
 
@@ -144,7 +144,7 @@ The existing Vercel project `happi-day-little-moments` is connected to `Piraticy
 | `src/Panel.tsx`, `src/useSectionSwipe.ts` | Native pop-up panels and guarded touch navigation |
 | `src/JournalApp.tsx` | Shared journal interface and local demo |
 | `src/CheckIn.tsx`, `src/History.tsx`, `src/Insights.tsx` | Free check-ins, history, and descriptive mood patterns |
-| `src/DailyPuzzle.tsx` | Rotating daily word puzzle |
+| `src/DailyExtras.tsx`, `src/DailyPuzzle.tsx`, `src/stories.ts` | Compact story and puzzle cards, daily word puzzle, and rotating original stories |
 | `src/LittleLifts.tsx`, `src/lifts.ts` | Daily wellbeing activities and rotation |
 | `src/model.ts` | Journal types, validation, local dates, and demo storage |
 | `src/Icons.tsx`, `src/styles.css` | Authored mood faces and responsive visual design |

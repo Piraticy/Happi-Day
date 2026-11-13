@@ -6,6 +6,7 @@ import CheckIn from './CheckIn'
 import Panel from './Panel'
 import useSectionSwipe from './useSectionSwipe'
 import LittleLifts from './LittleLifts'
+import DailyExtras from './DailyExtras'
 import History, { EntryList } from './History'
 import Insights from './Insights'
 import { Brand, MoodFace } from './Icons'
@@ -46,6 +47,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
   const mainRef = useRef<HTMLElement>(null)
   const journal = cloud?.journal ?? loaded.journal ?? freshJournal()
   const todayEntries = journal.entries.filter(entry => localDay(new Date(entry.timestamp)) === localDay(now))
+  const latestToday = [...todayEntries].sort((a, b) => b.timestamp.localeCompare(a.timestamp))[0]
 
 
   useEffect(() => {
@@ -164,7 +166,7 @@ export default function JournalApp({ cloud, onCloudLogin }: { cloud?: CloudView;
         <div className="page-view" role="region" aria-label="Journal pages" {...swipe}>
           <div className="today-layout" hidden={view !== 'today'}>
             <div className="page-intro checkin-intro"><h1>How are you<br />feeling today?</h1><p>A little check-in. A little more in tune.</p></div>
-            <aside className="daily-panel"><div className="section-heading"><h2>Today, as it happens</h2></div><p className="rhythm-description">{todayEntries.length ? `${todayEntries.length} ${todayEntries.length === 1 ? 'moment' : 'moments'} saved today` : 'A fresh page for today.'}</p><Insights entries={journal.entries} /><button className="today-moments-button" type="button" aria-haspopup="dialog" onClick={() => setPanel('moments')}><BookOpen size={18} /><span>Today’s moments</span><span className="moment-count">{todayEntries.length}</span><ArrowRight size={16} /></button></aside>
+            <aside className="daily-panel"><div className="section-heading"><h2>Today, as it happens</h2></div><div className="today-glance"><strong>{todayEntries.length}</strong><span><b>{todayEntries.length === 1 ? 'moment today' : 'moments today'}</b><small>{latestToday ? `Latest: ${MOODS.find(mood => mood.id === latestToday.mood)?.label} at ${new Date(latestToday.timestamp).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}` : 'A fresh page for you.'}</small></span></div><Insights entries={journal.entries} /><DailyExtras now={now} /><button className="today-moments-button" type="button" aria-haspopup="dialog" onClick={() => setPanel('moments')}><BookOpen size={18} /><span>Today’s moments</span><span className="moment-count">{todayEntries.length}</span><ArrowRight size={16} /></button></aside>
             <CheckIn onSave={entry => afterSave(save({ ...journal, entries: [...journal.entries, entry] }), () => { setNow(new Date()); setNotice('A little moment, saved.'); setDeleted(null) })} />
             <button type="button" className="lift-invitation" onClick={() => navigate('lifts')}><Sprout size={20} /><span>A small idea for your day<span>Discover your daily little lifts</span></span><ArrowRight size={18} /></button>
           </div>

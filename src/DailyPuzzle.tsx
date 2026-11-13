@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { localDay } from './model'
 
 const WORDS = [
   { answer: 'SMILE', clue: 'A happy expression' },
@@ -20,5 +19,6 @@ export default function DailyPuzzle({ now }: { now: Date }) {
   const [guess, setGuess] = useState('')
   const [done, setDone] = useState(false)
   const [tried, setTried] = useState(false)
-  return <section className="daily-puzzle"><h2>Today’s little puzzle</h2><p>Unscramble <strong>{puzzle.scrambled}</strong> · {puzzle.clue}</p><form onSubmit={event => { event.preventDefault(); setTried(true); if (guess.trim().toUpperCase() === puzzle.answer) setDone(true) }}><label className="sr-only" htmlFor="puzzle-guess">Your answer</label><input id="puzzle-guess" value={guess} onChange={event => { setGuess(event.target.value); setTried(false) }} maxLength={puzzle.answer.length} autoComplete="off" disabled={done} placeholder="Your answer" /><button className="text-button" type="submit" disabled={done || !guess.trim()}>{done ? 'Solved!' : 'Check answer'}</button></form>{tried && <p role="status">{done ? 'Nice one. Come back tomorrow for a new word.' : 'Not quite. Try another arrangement.'}</p>}</section>
+  const [hint, setHint] = useState(false)
+  return <section className="daily-puzzle"><p>Move these letters into a word:</p><div className="puzzle-letters" aria-label={`Scrambled letters ${puzzle.scrambled}`}>{puzzle.scrambled}</div><p className="puzzle-clue">Clue: {puzzle.clue}</p><button className="text-button puzzle-hint" type="button" onClick={() => setHint(true)} disabled={hint}>{hint ? `Starts with ${puzzle.answer[0]}` : 'Show a hint'}</button><form onSubmit={event => { event.preventDefault(); setTried(true); if (guess.trim().toUpperCase() === puzzle.answer) setDone(true) }}><label htmlFor="puzzle-guess">Your answer</label><input id="puzzle-guess" value={guess} onChange={event => { setGuess(event.target.value); setTried(false) }} maxLength={puzzle.answer.length} autoComplete="off" disabled={done} placeholder="Type the word" /><button className="primary-button" type="submit" disabled={done || !guess.trim()}>{done ? 'Solved!' : 'Check answer'}</button></form>{tried && <p role="status">{done ? 'Nice one. Come back tomorrow for a new word.' : 'Not quite. Try another arrangement.'}</p>}</section>
 }

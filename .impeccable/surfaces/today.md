@@ -4,15 +4,15 @@ Mode: Operate. Target: src/App.tsx and related components. Mobile-first web.
 
 ## Direction contract
 
-THESIS: Little moments makes three daily pauses feel approachable through expressive mood selection and a plain daily rhythm.
+THESIS: Little moments makes spontaneous mood check-ins feel approachable through expressive mood selection and a calm, compact dashboard.
 
 OWN-WORLD: Full palette: warm peach ground, plum ink and desktop navigation, coral actions, and lavender, blue, yellow, green, and peach mood faces. Bricolage Grotesque headings, DM Sans body. Soft edges and crisp flat fields without decorative imagery.
 
-STORY: Enter an explicitly labeled demo, select a mood, optionally explain it, save, and see the real entry. Editable times are a plan, not notifications.
+STORY: Enter an explicitly labeled demo, select a mood, optionally explain it, save, and see the real entry. The save time is recorded automatically.
 
-FIRST VIEWPORT: On phone, wordmark and leave control, date, clear mood question, a compact plan link, five labeled faces, an optional reason panel, and Save check-in. Save fits 375×667 with the keyboard closed; long notes, history and short landscape viewports scroll inside the page or a panel when needed. Saved moments open in a panel. Bottom navigation reaches Today, Little lifts, History and Your rhythm. Desktop retains the plum rail and side rhythm. Mobile welcome prioritizes entry over decorative copy. Selected moods settle once; reduced motion is respected.
+FIRST VIEWPORT: On phone, wordmark and options, date, clear mood question, compact today summary, five labeled faces, optional reason panel, and Save this moment. Save fits 375×667 with the keyboard closed; long notes, history and short landscape viewports scroll inside the page or a panel when needed. Story and puzzle cards appear on taller phones and always in Little lifts. Bottom navigation reaches Today, Little lifts and History. Desktop retains the plum rail, a side summary and extra cards. Mobile welcome prioritizes entry over decorative copy. Selected moods settle once; reduced motion is respected.
 
-LITTLE LIFTS: A separate destination for original, gentle wellbeing suggestions. Begin with one per day; increase to two and at most three across distinct check-in days. A stable calendar rotation refreshes daily; alternatives are optional. No streaks, penalties, guaranteed good mood, or activity completion tracking.
+LITTLE LIFTS: A separate destination for original, gentle wellbeing suggestions. Begin with one per day; increase to two and at most three across distinct check-in days. A stable calendar rotation refreshes daily; alternatives are optional. Swipe across the activity card or use its buttons. Compact cards open one of twelve original daily comedy stories and a hintable word puzzle. No streaks, penalties, guaranteed good mood, or activity completion tracking.
 
 FORM: Grounded direction 7, everyday fruit-market color, seed:7c6537b3d26825c2. The user explicitly selected Little moments and requested implementation. Code-led, matching the selected sketch at .impeccable/mocks/decision/little-moments.html.
 

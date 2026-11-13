@@ -7,6 +7,7 @@ import { MoodFace } from './Icons'
 
 export type SaveResult = boolean | Promise<boolean>
 type Props = { onSave: (entry: Entry) => SaveResult }
+const REASON_PROMPTS = ['Weather', 'Money', 'Movement', 'Food', 'Study', 'Travel', 'Home', 'Relationships', 'Music', 'A small win']
 
 export default function CheckIn({ onSave }: Props) {
   const [mood, setMood] = useState<Mood | null>(null)
@@ -39,7 +40,7 @@ export default function CheckIn({ onSave }: Props) {
     } catch (error) { setFormError((error as Error).message) }
     finally { pending.current = false; setSaving(false) }
   }}>
-    <p className="moment-time">Whenever you check in, the time is saved automatically.</p>
+    <p className="moment-time">Check in anytime. We’ll remember when.</p>
     <fieldset className="mood-fieldset">
       <legend className="sr-only">How are you feeling?</legend>
       <div className="mood-options">{MOODS.map(item => <label key={item.id} className={`mood-option ${mood === item.id ? 'is-selected' : ''}`}>
@@ -54,6 +55,12 @@ export default function CheckIn({ onSave }: Props) {
     {detailsOpen && <Panel title="Your reason" onClose={() => setDetailsOpen(false)}><fieldset id="checkin-reasons" className="reason-fieldset">
       <legend>What’s behind it? <span>optional</span></legend>
       <div className="reason-options">{REASONS.map(reason => <button type="button" disabled={saving} key={reason} aria-pressed={reasons.includes(reason)} onClick={() => setReasons(current => current.includes(reason) ? current.filter(item => item !== reason) : [...current, reason])}>{reason}</button>)}</div>
+      <p className="reason-prompt-label">More ideas for your own words <span>Swipe for more</span></p>
+      <div className="reason-prompts" role="group" aria-label="More reason ideas, scroll sideways">{REASON_PROMPTS.map(prompt => { const selected = note.toLowerCase().split(/,\s*/).includes(prompt.toLowerCase()); return <button type="button" disabled={saving || selected} aria-pressed={selected} key={prompt} onClick={() => setNote(current => {
+        if (current.toLowerCase().split(/,\s*/).includes(prompt.toLowerCase())) return current
+        const next = current.trim() ? `${current.trim()}, ${prompt.toLowerCase()}` : prompt
+        return next.length <= 500 ? next : current
+      })}>{prompt}</button> })}</div>
       <label className="sr-only" htmlFor="custom-reason">Your own reason</label>
       <textarea id="custom-reason" disabled={saving} placeholder="Or put it in your own words…" maxLength={500} value={note} onChange={event => setNote(event.target.value)} rows={2} />
       <div className="field-footnote"><span>A few words, or none at all.</span><span>{note.length}/500</span></div>

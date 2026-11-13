@@ -26,6 +26,8 @@ Users can check in whenever they want. Saving records the time automatically; th
 
 - Select a mood type.
 - Select suggested reasons or enter a custom reason.
+- Browse additional reason prompts that become editable personal words, within the existing cloud schema.
+- Open a daily original humor story or a short word puzzle from Today or Little lifts.
 - Any number of spontaneous daily check-ins, each with an automatic timestamp.
 - Passwordless login page. The user explicitly chose a clearly labeled local demo login for this first version.
 - The user requested real passwordless sign-in and cross-device history, and selected Supabase. The live Supabase project and Vercel frontend are configured. The user subsequently chose username sessions without passwords.

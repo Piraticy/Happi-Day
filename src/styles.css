@@ -721,31 +721,97 @@ body:has(.app-update-offer) .notice { bottom: 82px; }
   .app-update-content { font-size: 14px; }
   body:has(.app-update-offer) .notice { bottom: calc(150px + env(safe-area-inset-bottom)); }
 }
-/* Free check-ins and compact daily extras. */
+/* A quiet task surface, with optional stories and play one tap away. */
 .moment-time { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
-.daily-panel { display: flex; flex-direction: column; justify-content: space-between; }
-.lifts-extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
-.daily-story, .daily-puzzle, .insights { border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: var(--field, #fff9f2); }
-.daily-story h2, .daily-puzzle h2, .insights h2 { font-family: var(--heading); font-size: 19px; margin: 0 0 10px; }
-.daily-story p, .daily-puzzle p, .insights p { font-size: 14px; margin: 0 0 8px; }
-.daily-story span, .insight-note { color: var(--muted); font-size: 12px; }
-.daily-puzzle form { display: flex; gap: 10px; align-items: center; }
-.daily-puzzle input { width: min(100%, 150px); min-height: 42px; border: 1px solid var(--line); border-radius: 9px; padding: 8px; background: var(--ground); }
-.insights { margin-bottom: 16px; }
+.checkin-form { border: 1px solid var(--line); border-radius: 20px; background: var(--field); padding: clamp(18px, 2vw, 28px); }
+.daily-panel { display: flex; flex-direction: column; justify-content: flex-start; }
+.today-glance { display: flex; align-items: center; gap: 12px; margin: 16px 0 2px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--field); }
+.today-glance > strong { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: var(--ink); color: var(--ground); font-size: 15px; font-variant-numeric: tabular-nums; }
+.today-glance > span { display: grid; min-width: 0; line-height: 1.3; }
+.today-glance b { font-size: 12px; font-weight: 600; }
+.today-glance small { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.reason-prompt-label { display: flex; justify-content: space-between; gap: 8px; margin: 4px 0 8px; color: var(--muted); font-size: 12px; }
+.reason-prompt-label span { display: none; color: var(--coral); }
+.reason-prompts { display: flex; gap: 8px; overflow-x: auto; overscroll-behavior-x: contain; padding: 2px 2px 8px; margin-bottom: 12px; scrollbar-width: thin; }
+.reason-prompts button { flex-shrink: 0; min-height: 40px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); color: var(--ink); font-size: 12px; }
+.reason-prompts button:hover { border-color: var(--coral); }
+.reason-prompts button[aria-pressed='true'] { border-color: var(--coral); background: #f8e3d4; color: var(--ink); opacity: 1; }
+.lifts-page { gap: 12px; }
+.lifts-daily { margin-top: 0; }
+.lift-list { flex: 0 0 auto; margin-top: 0; touch-action: pan-y pinch-zoom; }
+.lift-list > li { min-height: 152px; padding: 20px 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--field); }
+.lift-heading h2 { margin-bottom: 8px; }
+.lift-list p { margin-bottom: 8px; }
+.lifts-page .page-controls { margin-top: 0; padding-top: 0; }
+.lift-actions { padding-top: 0; }
+.lifts-extras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 2px; }
+.extra-card { display: grid; grid-template-columns: 25px minmax(0, 1fr) 18px; align-items: start; gap: 10px; min-height: 90px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--ink); text-align: left; }
+.extra-card > svg:first-child { color: var(--coral); }
+.extra-card > svg:last-child { align-self: center; }
+.extra-card > span { display: grid; gap: 3px; min-width: 0; }
+.extra-card strong { font-family: var(--heading); font-size: 16px; line-height: 1.15; }
+.extra-card small { color: var(--muted); font-size: 11px; line-height: 1.4; }
+.extra-card:hover { border-color: var(--coral); background: #f8e3d4; }
+.story-reading h3 { font-family: var(--heading); font-size: clamp(24px, 4vw, 34px); line-height: 1.15; margin: 2px 0 16px; }
+.story-reading p { max-width: 62ch; font-size: 16px; line-height: 1.7; }
+.story-reading .primary-button { width: fit-content; margin: 18px 0; }
+.story-reading .story-ending { padding: 14px 16px; border-radius: 12px; background: var(--surface); font-weight: 600; }
+.story-reading small { display: block; margin-top: 16px; color: var(--muted); }
+.daily-puzzle > p { font-size: 15px; margin: 0 0 12px; }
+.puzzle-letters { width: fit-content; padding: 10px 16px; margin: 0 0 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-family: var(--heading); font-size: clamp(30px, 7vw, 48px); font-weight: 700; letter-spacing: .16em; }
+.daily-puzzle .puzzle-clue { color: var(--muted); }
+.daily-puzzle .puzzle-hint { margin-bottom: 18px; }
+.daily-puzzle form { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: end; max-width: 460px; }
+.daily-puzzle label { grid-column: 1 / -1; font-size: 12px; font-weight: 600; }
+.daily-puzzle input { width: 100%; min-height: 52px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 13px; background: var(--field); font-size: 16px; }
+.daily-puzzle .primary-button { width: auto; min-height: 52px; }
+.daily-puzzle [role='status'] { margin-top: 14px; }
+.insights { border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: var(--field); margin-bottom: 16px; }
+.insights h2 { font-family: var(--heading); font-size: 19px; margin: 0 0 10px; }
+.insights p { font-size: 14px; margin: 0 0 8px; }
+.insight-note { color: var(--muted); font-size: 12px; }
 .insight-bars { display: grid; gap: 6px; margin: 12px 0; }
 .insight-bars > div { display: grid; grid-template-columns: 50px minmax(0, 1fr) 22px; align-items: center; gap: 8px; font-size: 12px; }
 .insight-bars meter { width: 100%; }
-@media (max-width: 760px) { .lifts-extras { grid-template-columns: 1fr; } }
 
 .history-tools { display: grid; gap: 6px; }
 .desktop-export { justify-self: end; margin-bottom: 10px; }
 @media (max-width: 760px) { .desktop-export { display: none; } }
 
 .daily-panel .insights { background: transparent; border: 0; padding: 0; margin: 14px 0; overflow: auto; }
+.daily-panel .lifts-extras { grid-template-columns: 1fr; gap: 8px; margin-top: auto; }
+.daily-panel .extra-card { min-height: 68px; padding: 12px; }
 @media (max-width: 760px) {
-  .today-layout { grid-template-rows: auto minmax(min-content, 1fr) auto; }
-  .checkin-form { grid-row: 2; }
-  .today-moments-button, .lift-invitation { grid-row: 3; }
+  .today-layout { grid-template-rows: auto auto auto minmax(104px, 1fr) auto; gap: 8px 12px; }
+  .today-glance { grid-column: 1 / -1; grid-row: 2; margin: 0; padding: 8px 12px; }
+  .checkin-form { grid-row: 3; justify-content: flex-start; padding: 13px; }
+  .moment-time { font-size: 11px; margin-bottom: 8px; }
+  .mood-option { min-height: 85px; padding-bottom: 6px; }
+  .mood-option .mood-face { width: min(48px, 100%); margin-bottom: 7px; }
+  .mood-caption { margin: 6px 0 8px; }
+  .reason-toggle { margin-top: 0; }
+  .save-checkin { margin-top: 8px; }
+  .save-footnote { display: none; }
+  .today-moments-button, .lift-invitation { grid-row: 5; align-self: end; }
   .daily-panel { display: contents; }
-  .daily-panel > .section-heading, .daily-panel > .rhythm-description, .daily-panel > .insights { display: none; }
+  .daily-panel > .section-heading, .daily-panel > .insights { display: none; }
+  .reason-prompt-label span { display: inline; }
+  .daily-panel > .lifts-extras { grid-column: 1 / -1; grid-row: 4; grid-template-columns: repeat(2, minmax(0, 1fr)); align-self: start; margin-top: 2px; }
+  .lifts-page { gap: 9px; }
+  .lifts-daily p > span { display: inline; }
+  .lift-list > li { min-height: 138px; padding: 15px; }
+  .lift-heading h2 { font-size: 21px; }
+  .lift-list p { font-size: 13px; }
+  .lift-actions .text-button { font-size: 11px; }
+  .extra-card { grid-template-columns: 22px minmax(0, 1fr); gap: 7px; min-height: 102px; padding: 12px; }
+  .extra-card > svg:last-child { display: none; }
+  .extra-card strong { font-size: 14px; }
+  .story-reading .primary-button { width: 100%; }
+  .daily-puzzle form { grid-template-columns: 1fr; }
+  .daily-puzzle .primary-button { width: 100%; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .daily-panel > .lifts-extras { display: none; }
+  .today-layout { grid-template-rows: auto auto auto minmax(44px, 1fr); }
+  .today-moments-button, .lift-invitation { grid-row: 4; }
 }
